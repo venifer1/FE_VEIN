@@ -7,7 +7,7 @@ import {
 import { api, type Envelope } from "./api";
 import { authBridge } from "@/store/auth";
 import { instrumentPathId, signalPathId } from "./types";
-import type { WeeklyReport, SignupInput, SignupResponse } from "./types";
+import type { WeeklyReport, SignupInput, SignupResponse, MacroSnapshot } from "./types";
 import type {
   Alert,
   AdminAuditLog,
@@ -1174,6 +1174,19 @@ export function useWeeklyReport(windowDays = 90) {
       const resp = await api.get<Envelope<WeeklyReport>>("/public/reports/weekly", {
         params: { window_days: windowDays },
       });
+      return resp.data.data;
+    },
+  });
+}
+
+// Macro / market regime snapshot (authenticated). Refreshes every 5 min.
+export function useMacro() {
+  return useQuery({
+    queryKey: ["macro"],
+    staleTime: 5 * 60_000,
+    refetchInterval: 5 * 60_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<MacroSnapshot>>("/macro");
       return resp.data.data;
     },
   });

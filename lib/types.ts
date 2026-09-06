@@ -140,6 +140,39 @@ export interface WeeklyReport {
   disclaimer: string;
 }
 
+// ----- macro / market regime (/macro) -----
+export interface MacroSignal {
+  key: string;
+  direction: "BULLISH" | "BEARISH" | "NEUTRAL";
+  detail: string;
+}
+
+export interface MacroRegime {
+  label: "BULL" | "BEAR" | "RANGE" | "TRANSITION";
+  score: number;
+  summary: string;
+  signals: MacroSignal[];
+}
+
+export interface MacroYieldCurve {
+  tenor3m: string | null;
+  tenor2y: string | null;
+  tenor10y: string | null;
+  spread10y2y: string | null;
+  spread10y3m: string | null;
+  inverted: boolean | null;
+  as_of: string | null;
+}
+
+export interface MacroSnapshot {
+  regime: MacroRegime;
+  yield_curve: MacroYieldCurve | null;
+  m2: { value: string; yoy_pct: string | null; as_of: string } | null;
+  dxy: { value: string; trend: string; as_of: string } | null;
+  generated_at: string;
+  sources: string[];
+}
+
 // ----- public signup (/auth/signup) -----
 export interface SignupInput {
   email: string;

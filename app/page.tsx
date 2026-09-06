@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
+import { RegimeBanner } from "@/components/regime-banner";
 import { InstrumentSearch } from "@/components/instrument-search";
 import { InstrumentLabel } from "@/components/instrument-label";
 import { Sparkline } from "@/components/sparkline";
@@ -517,6 +518,7 @@ function HomeInner() {
   return (
     <div className="space-y-4 p-4">
       <h1 className="text-lg font-semibold">터미널</h1>
+      <RegimeBanner />
       <InstrumentSearch />
       <GlobalMarketSection />
       <IndicesSection />
