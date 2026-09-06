@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ComplianceFooter } from "@/components/states";
+import { DonateLink } from "@/components/donate-link";
 import { useWeeklyReport, useSignup } from "@/lib/queries";
 import { extractError, BASE } from "@/lib/api";
 import { useAuthStore } from "@/store/auth";
@@ -245,6 +246,10 @@ function LandingInner() {
           </p>
         </CardContent>
       </Card>
+
+      <div className="flex justify-center">
+        <DonateLink variant="inline" />
+      </div>
 
       <ComplianceFooter />
     </div>

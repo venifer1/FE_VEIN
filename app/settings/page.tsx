@@ -6,6 +6,7 @@ import { Bell, BellRing, Database, LogOut, ShieldCheck } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { FreshnessBadge, TypeBadge } from "@/components/badges";
 import { EmptyState, ErrorState } from "@/components/states";
+import { DonateLink } from "@/components/donate-link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -452,6 +453,8 @@ function SettingsInner() {
             </div>
           </CardContent>
         </Card>
+
+        <DonateLink variant="card" />
 
         <Button variant="destructive" className="w-full" onClick={onLogout} disabled={logout.isPending}>
           <LogOut className="h-4 w-4" />
