@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Pretendard Variable";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2-variations");
+  font-style: normal;
+  font-weight: 45 920;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --background: 222 30% 8%;
+    --foreground: 210 20% 96%;
+    --card: 222 26% 11%;
+    --card-foreground: 210 20% 96%;
+    --primary: 199 89% 56%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 19% 20%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 217 19% 18%;
+    --muted-foreground: 215 16% 62%;
+    --accent: 217 19% 22%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 98%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --border: 217 19% 22%;
+    --input: 217 19% 22%;
+    --ring: 199 89% 56%;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      "Pretendard Variable",
+      Pretendard,
+      -apple-system,
+      BlinkMacSystemFont,
+      system-ui,
+      sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* hide scrollbar for filter chips row */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,18 @@
+{
+  "name": "VEIN — 트레이딩 인텔리전스",
+  "short_name": "VEIN",
+  "description": "VEIN 내부 알파 — 코인 패턴 신호(ABC·삼각수렴) 모바일 클라이언트",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1521",
+  "theme_color": "#0f1521",
+  "icons": [
+    {
+      "src": "/vein_logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
