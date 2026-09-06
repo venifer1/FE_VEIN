@@ -2,6 +2,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -81,6 +82,13 @@ function LoginInner() {
           {isSubmitting ? "로그인 중..." : "로그인"}
         </Button>
       </form>
+
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        처음이신가요?{" "}
+        <Link href="/landing" className="font-medium text-primary underline underline-offset-4">
+          무료로 시작하기
+        </Link>
+      </p>
 
       {USE_MOCK && (
         <p className="mt-4 rounded-md bg-secondary px-3 py-2 text-center text-xs text-muted-foreground">

@@ -102,6 +102,60 @@ export interface AuthTokens {
   user: User;
 }
 
+// ----- public content: weekly performance report (/public/reports/weekly) -----
+export interface WeeklyReportOverall {
+  sample_size: number;
+  hit_rate: string;
+  avg_return_pct: string;
+}
+
+export interface WeeklyReportRow {
+  type: string;
+  market: string;
+  timeframe: string;
+  sample_size: number;
+  hit_rate: string;
+  avg_return_pct: string;
+  median_return_pct: string;
+}
+
+export interface WeeklyReportHighlight {
+  kind: "BEST" | "WORST";
+  label: string;
+  type: string;
+  market: string;
+  timeframe: string;
+  sample_size: number;
+  hit_rate: string;
+  avg_return_pct: string;
+}
+
+export interface WeeklyReport {
+  generated_at: string;
+  window_days: number;
+  horizon: string;
+  overall: WeeklyReportOverall;
+  rows: WeeklyReportRow[];
+  highlights: WeeklyReportHighlight[];
+  disclaimer: string;
+}
+
+// ----- public signup (/auth/signup) -----
+export interface SignupInput {
+  email: string;
+  password: string;
+  signup_source?: string;
+  signup_referrer?: string;
+}
+
+export interface SignupResponse {
+  status: UserStatus;
+  user: User;
+  access_token?: string;
+  refresh_token?: string;
+  expires_in?: number;
+}
+
 // Backend returns numeric ids for instruments (e.g. 4). We keep id as
 // string|number to tolerate both, and normalize to a path-safe string via
 // instrumentPathId() before building /instruments/{id} URLs.

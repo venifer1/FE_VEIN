@@ -7,6 +7,7 @@ import {
 import { api, type Envelope } from "./api";
 import { authBridge } from "@/store/auth";
 import { instrumentPathId, signalPathId } from "./types";
+import type { WeeklyReport, SignupInput, SignupResponse } from "./types";
 import type {
   Alert,
   AdminAuditLog,
@@ -1158,6 +1159,31 @@ export function useLogin() {
   return useMutation({
     mutationFn: async (input: { email: string; password: string }) => {
       const resp = await api.post<Envelope<AuthTokens>>("/auth/login", input);
+      return resp.data.data;
+    },
+  });
+}
+
+// Public weekly performance report — no auth required (landing page).
+export function useWeeklyReport(windowDays = 90) {
+  return useQuery({
+    queryKey: ["public-weekly-report", windowDays],
+    staleTime: 5 * 60_000,
+    retry: 1,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<WeeklyReport>>("/public/reports/weekly", {
+        params: { window_days: windowDays },
+      });
+      return resp.data.data;
+    },
+  });
+}
+
+// Public self-service signup. Returns tokens when auto-approved, else PENDING.
+export function useSignup() {
+  return useMutation({
+    mutationFn: async (input: SignupInput) => {
+      const resp = await api.post<Envelope<SignupResponse>>("/auth/signup", input);
       return resp.data.data;
     },
   });
