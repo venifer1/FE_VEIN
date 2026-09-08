@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { RegimeBanner } from "@/components/regime-banner";
+import { EconomicCalendar } from "@/components/economic-calendar";
 import { InstrumentSearch } from "@/components/instrument-search";
 import { InstrumentLabel } from "@/components/instrument-label";
 import { Sparkline } from "@/components/sparkline";
@@ -519,6 +520,7 @@ function HomeInner() {
     <div className="space-y-4 p-4">
       <h1 className="text-lg font-semibold">터미널</h1>
       <RegimeBanner />
+      <EconomicCalendar />
       <InstrumentSearch />
       <GlobalMarketSection />
       <IndicesSection />

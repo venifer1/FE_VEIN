@@ -479,6 +479,23 @@ function DetailInner() {
               </CardContent>
             </Card>
 
+            {signal.event_risk?.active && (
+              <div
+                className={`rounded-md border px-3 py-2 text-sm ${
+                  signal.event_risk.level === "HIGH"
+                    ? "border-destructive/40 bg-destructive/10 text-destructive"
+                    : "border-amber-500/40 bg-amber-500/10 text-amber-600"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="shrink-0 rounded px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide">
+                    ⚠ 이벤트 리스크 {signal.event_risk.level}
+                  </span>
+                </div>
+                <p className="mt-1 leading-snug">{signal.event_risk.note}</p>
+              </div>
+            )}
+
             <SignalActionPanel id={id} signal={signal} instrumentNavId={instrumentNavId} />
 
             <Card>

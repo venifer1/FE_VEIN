@@ -173,6 +173,39 @@ export interface MacroSnapshot {
   sources: string[];
 }
 
+// ----- economic calendar (/macro/calendar) -----
+export type EconomicEventType = "FOMC" | "CPI" | "EMPLOYMENT" | "EARNINGS";
+
+export interface EconomicEvent {
+  date: string; // yyyy-mm-dd
+  dday: number; // 오늘 기준 D±n (양수=예정, 0=당일, 음수=경과)
+  type: EconomicEventType;
+  title: string;
+  region: string; // US | GLOBAL
+  impact: string; // HIGH | MEDIUM
+}
+
+export interface MacroCalendar {
+  events: EconomicEvent[];
+  generated_at: string;
+}
+
+// ----- signal event risk (신호 상세의 이벤트 리스크 라벨) -----
+export interface EventRiskItem {
+  date: string;
+  dday: number;
+  type: EconomicEventType;
+  title: string;
+}
+
+export interface SignalEventRisk {
+  active: boolean;
+  level: "HIGH" | "MEDIUM";
+  confidence_delta: number;
+  note: string;
+  events: EventRiskItem[];
+}
+
 // ----- public signup (/auth/signup) -----
 export interface SignupInput {
   email: string;
@@ -309,6 +342,7 @@ export interface SignalDetail extends Signal {
   invalidation?: Invalidation | null;
   chart_range?: ChartRange | null;
   algorithm_version?: string | null;
+  event_risk?: SignalEventRisk | null;
 }
 
 // ----- signal performance (성과) -----

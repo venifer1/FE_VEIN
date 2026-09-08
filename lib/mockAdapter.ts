@@ -188,6 +188,33 @@ function idMatches(entityId: string | number, pathId: string): boolean {
   return stripped === pathId;
 }
 
+// R39: 경제 캘린더 목업. 실 백엔드는 큐레이션 고정일+NFP 규칙이지만, 목업은 "오늘"부터
+// 상대적으로 배치해 항상 임박 이벤트가 보이도록 합성한다(계약 형태만 동일).
+function upcomingMacroEvents(days: number) {
+  const seeds: Array<{ inDays: number; type: "FOMC" | "CPI" | "EMPLOYMENT"; title: string }> = [
+    { inDays: 1, type: "CPI", title: "미국 소비자물가(CPI)" },
+    { inDays: 4, type: "EMPLOYMENT", title: "미국 고용보고서(비농업)" },
+    { inDays: 9, type: "FOMC", title: "미국 FOMC 금리결정" },
+    { inDays: 22, type: "CPI", title: "미국 소비자물가(CPI)" },
+  ];
+  const now = new Date();
+  const cap = Math.max(1, Math.min(days, 90));
+  return seeds
+    .filter((s) => s.inDays <= cap)
+    .map((s) => {
+      const d = new Date(now);
+      d.setUTCDate(d.getUTCDate() + s.inDays);
+      return {
+        date: d.toISOString().slice(0, 10),
+        dday: s.inDays,
+        type: s.type,
+        title: s.title,
+        region: "US",
+        impact: "HIGH",
+      };
+    });
+}
+
 export const mockAdapter: AxiosAdapter = async (config) => {
   await new Promise((r) => setTimeout(r, 220)); // simulate latency
   const method = (config.method ?? "get").toLowerCase();
@@ -486,7 +513,45 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     const detail = getSignalDetail(sigMatch[1]);
     if (!detail) fail(config, 404, "SIGNAL_NOT_FOUND", "신호를 찾을 수 없습니다.");
     const freshness = detail.status === "EXPIRED" ? "DELAYED" : "FRESH";
-    return ok(config, detail, { freshness });
+    // R39: 이벤트 리스크 라벨 계약 parity — 임박한 매크로 이벤트 예시 1건.
+    const nextEvent = upcomingMacroEvents(14).find((e) => e.dday >= 0 && e.dday <= 3);
+    const withRisk = nextEvent
+      ? {
+          ...detail,
+          event_risk: {
+            active: true,
+            level: nextEvent.dday <= 1 ? "HIGH" : "MEDIUM",
+            confidence_delta: nextEvent.dday <= 1 ? -10 : -5,
+            note: `${nextEvent.dday === 0 ? "D-DAY" : `D-${nextEvent.dday}`} ${nextEvent.title} — 이벤트 전후 변동성 확대, 신호 신뢰도 하향 참고(${nextEvent.dday <= 1 ? -10 : -5})`,
+            events: [{ date: nextEvent.date, dday: nextEvent.dday, type: nextEvent.type, title: nextEvent.title }],
+          },
+        }
+      : detail;
+    return ok(config, withRisk, { freshness });
+  }
+
+  // ----- macro / market regime + economic calendar -----
+  if (path === "/macro" && method === "get") {
+    return ok(config, {
+      regime: {
+        label: "RANGE",
+        score: 0,
+        summary: "뚜렷한 방향 없음 — 횡보 국면",
+        signals: [
+          { key: "EQUITY_TREND", direction: "NEUTRAL", detail: "나스닥 횡보 (+0.3%)" },
+          { key: "SENTIMENT", direction: "NEUTRAL", detail: "중립 · 공포탐욕 52" },
+        ],
+      },
+      yield_curve: null,
+      m2: null,
+      dxy: null,
+      generated_at: new Date().toISOString(),
+      sources: ["NASDAQ", "FEAR_GREED"],
+    });
+  }
+  if (path === "/macro/calendar" && method === "get") {
+    const days = Number(params.get("days") ?? 14);
+    return ok(config, { events: upcomingMacroEvents(days), generated_at: new Date().toISOString() });
   }
 
   // ----- backtest (백테스트) -----

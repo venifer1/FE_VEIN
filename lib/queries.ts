@@ -7,7 +7,7 @@ import {
 import { api, type Envelope } from "./api";
 import { authBridge } from "@/store/auth";
 import { instrumentPathId, signalPathId } from "./types";
-import type { WeeklyReport, SignupInput, SignupResponse, MacroSnapshot } from "./types";
+import type { WeeklyReport, SignupInput, SignupResponse, MacroSnapshot, MacroCalendar } from "./types";
 import type {
   Alert,
   AdminAuditLog,
@@ -1187,6 +1187,19 @@ export function useMacro() {
     refetchInterval: 5 * 60_000,
     queryFn: async () => {
       const resp = await api.get<Envelope<MacroSnapshot>>("/macro");
+      return resp.data.data;
+    },
+  });
+}
+
+// Economic calendar — upcoming high-impact macro events with D-day. Refreshes hourly.
+export function useMacroCalendar(days = 14) {
+  return useQuery({
+    queryKey: ["macro-calendar", days],
+    staleTime: 60 * 60_000,
+    refetchInterval: 60 * 60_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<MacroCalendar>>("/macro/calendar", { params: { days } });
       return resp.data.data;
     },
   });
