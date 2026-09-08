@@ -25,6 +25,8 @@ import {
   useWebPushConfig,
   useSaveWebPushSubscription,
   useDeleteWebPushSubscription,
+  useNotificationPrefs,
+  useUpdateNotificationPrefs,
 } from "@/lib/queries";
 import { useAuthStore } from "@/store/auth";
 import { formatRelative, formatTime } from "@/lib/format";
@@ -261,6 +263,75 @@ function WebNotificationSettings({ notifications }: { notifications: Notificatio
   );
 }
 
+// 조용한 시간(R42, 알림 노이즈 완화). 설정한 KST 시간대(자정 넘김 지원) 동안엔 새 알림을
+// 만들지 않는다. 자는 사이 쌓이는 핑을 줄이고, 창이 끝나면 후속 신호가 정상 알림.
+function QuietHoursCard() {
+  const { data, isLoading } = useNotificationPrefs();
+  const update = useUpdateNotificationPrefs();
+  const enabled = data?.quiet_enabled ?? false;
+  const start = data?.quiet_start_hour ?? 22;
+  const end = data?.quiet_end_hour ?? 8;
+
+  const save = (next: { quiet_enabled: boolean; quiet_start_hour: number; quiet_end_hour: number }) =>
+    update.mutate(next);
+
+  return (
+    <Card>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">조용한 시간</h2>
+            <p className="mt-1 text-xs text-muted-foreground">이 시간대(KST)에는 새 알림을 만들지 않습니다.</p>
+          </div>
+          <Switch
+            checked={enabled}
+            disabled={isLoading || update.isPending}
+            onCheckedChange={(v) => save({ quiet_enabled: v, quiet_start_hour: start, quiet_end_hour: end })}
+            aria-label="조용한 시간 활성화"
+          />
+        </div>
+        {enabled && (
+          <div className="flex items-center gap-2 text-sm">
+            <HourSelect
+              value={start}
+              onChange={(h) => save({ quiet_enabled: true, quiet_start_hour: h, quiet_end_hour: end })}
+              disabled={update.isPending}
+            />
+            <span className="text-muted-foreground">부터</span>
+            <HourSelect
+              value={end}
+              onChange={(h) => save({ quiet_enabled: true, quiet_start_hour: start, quiet_end_hour: h })}
+              disabled={update.isPending}
+            />
+            <span className="text-muted-foreground">까지</span>
+          </div>
+        )}
+        {enabled && start === end && (
+          <p className="text-xs text-amber-600">시작과 종료가 같으면 창이 비어 알림이 억제되지 않습니다.</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function HourSelect({ value, onChange, disabled }: { value: number; onChange: (h: number) => void; disabled?: boolean }) {
+  return (
+    <select
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className="rounded-md border border-border bg-background px-2 py-1 text-sm tabular-nums"
+      aria-label="시각 선택"
+    >
+      {Array.from({ length: 24 }, (_, h) => (
+        <option key={h} value={h}>
+          {String(h).padStart(2, "0")}:00
+        </option>
+      ))}
+    </select>
+  );
+}
+
 function AlertCenter({
   alerts,
   alertsQuery,
@@ -300,6 +371,8 @@ function AlertCenter({
       </div>
 
       <WebNotificationSettings notifications={notifications} />
+
+      <QuietHoursCard />
 
       <Card>
         <CardContent className="space-y-3">

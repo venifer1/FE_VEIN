@@ -995,6 +995,13 @@ export interface SidecarStatus {
   url?: string | null;
 }
 
+// ----- 알림 환경설정 · 조용한 시간 (/me/notification-prefs) -----
+export interface NotificationPrefs {
+  quiet_enabled: boolean;
+  quiet_start_hour: number; // KST 0-23
+  quiet_end_hour: number; // KST 0-23
+}
+
 export interface SystemStatus {
   providers: ProviderStatus[];
   build_version?: string | null;

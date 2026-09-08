@@ -215,6 +215,9 @@ function upcomingMacroEvents(days: number) {
     });
 }
 
+// 조용한 시간(R42) 목업 상태 — PUT으로 갱신, GET으로 반환(세션 내 유지).
+let mockNotificationPrefs = { quiet_enabled: false, quiet_start_hour: 22, quiet_end_hour: 8 };
+
 export const mockAdapter: AxiosAdapter = async (config) => {
   await new Promise((r) => setTimeout(r, 220)); // simulate latency
   const method = (config.method ?? "get").toLowerCase();
@@ -247,6 +250,19 @@ export const mockAdapter: AxiosAdapter = async (config) => {
   }
   if (path === "/me" && method === "get") {
     return ok(config, { id: "usr_1", email: "tester@vein.test", role: "TESTER", status: "APPROVED" });
+  }
+  // 알림 환경설정 · 조용한 시간(R42)
+  if (path === "/me/notification-prefs" && method === "get") {
+    return ok(config, mockNotificationPrefs);
+  }
+  if (path === "/me/notification-prefs" && method === "put") {
+    const b = body(config);
+    mockNotificationPrefs = {
+      quiet_enabled: !!b.quiet_enabled,
+      quiet_start_hour: Number(b.quiet_start_hour ?? 22),
+      quiet_end_hour: Number(b.quiet_end_hour ?? 8),
+    };
+    return ok(config, mockNotificationPrefs);
   }
 
   // ----- market terminal -----

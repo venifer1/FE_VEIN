@@ -36,6 +36,7 @@ import type {
   NewsItem,
   NewsSource,
   Notification,
+  NotificationPrefs,
   PaperAccount,
   PaperOrder,
   PaperPerformance,
@@ -1080,6 +1081,31 @@ export function useSystemStatus(enabled = true) {
     queryFn: async () => {
       const resp = await api.get<Envelope<SystemStatus>>("/system/status");
       return resp.data.data;
+    },
+  });
+}
+
+// 알림 환경설정 · 조용한 시간(R42)
+export function useNotificationPrefs() {
+  return useQuery({
+    queryKey: ["notification-prefs"],
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<NotificationPrefs>>("/me/notification-prefs");
+      return resp.data.data;
+    },
+  });
+}
+
+export function useUpdateNotificationPrefs() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (prefs: NotificationPrefs) => {
+      const resp = await api.put<Envelope<NotificationPrefs>>("/me/notification-prefs", prefs);
+      return resp.data.data;
+    },
+    onSuccess: (data) => {
+      qc.setQueryData(["notification-prefs"], data);
     },
   });
 }
