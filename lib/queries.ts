@@ -339,6 +339,21 @@ export function useSignals(filter: SignalFilter) {
   });
 }
 
+// 오늘의 주목 신호(R41): Pattern Score 상위 활성 신호. 신호 과다 완화용 홈 큐레이션.
+export function useTopSignals(market?: Market, limit = 6) {
+  return useQuery({
+    queryKey: ["signals-top", market ?? "ALL", limit],
+    staleTime: 60_000,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<Signal[]>>("/signals/top", {
+        params: { market, limit },
+      });
+      return resp.data.data;
+    },
+  });
+}
+
 export function useRunConditionScan() {
   return useMutation({
     mutationFn: async (request: ConditionScanRequest) => {

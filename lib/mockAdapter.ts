@@ -433,6 +433,15 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     if (cursor) return ok(config, [], { next_cursor: null });
     return ok(config, list, { next_cursor: null, freshness: "FRESH" });
   }
+  // top signals by score (R41) — must precede the /signals/{id} matcher.
+  if (path === "/signals/top" && method === "get") {
+    const market = params.get("market");
+    const limit = Number(params.get("limit") ?? 10);
+    let list = mockSignals.filter((s) => s.status === "DETECTED" || s.status === "NEAR_COMPLETION");
+    if (market) list = list.filter((s) => s.market === market);
+    list = [...list].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0)).slice(0, limit);
+    return ok(config, list, { freshness: "FRESH" });
+  }
   // performance summary (aggregate) — must precede the /signals/{id} matcher.
   if (path === "/signals/performance/summary" && method === "get") {
     const rows = getSignalPerformanceSummary({

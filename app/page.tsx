@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { RegimeBanner } from "@/components/regime-banner";
 import { EconomicCalendar } from "@/components/economic-calendar";
+import { TopSignalsSection } from "@/components/top-signals";
 import { InstrumentSearch } from "@/components/instrument-search";
 import { InstrumentLabel } from "@/components/instrument-label";
 import { Sparkline } from "@/components/sparkline";
@@ -521,6 +522,7 @@ function HomeInner() {
       <h1 className="text-lg font-semibold">터미널</h1>
       <RegimeBanner />
       <EconomicCalendar />
+      <TopSignalsSection />
       <InstrumentSearch />
       <GlobalMarketSection />
       <IndicesSection />
