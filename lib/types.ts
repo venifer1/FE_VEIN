@@ -986,7 +986,13 @@ export interface WebPushConfig {
 export interface ProviderStatus {
   provider: string;
   freshness: Freshness;
+  source?: "REAL" | "STUB" | string | null; // STUB = 합성 스텁 폴백 중(사이드카 다운)
   last_run_at?: string | null;
+}
+
+export interface SidecarStatus {
+  healthy: boolean;
+  url?: string | null;
 }
 
 export interface SystemStatus {
@@ -994,6 +1000,7 @@ export interface SystemStatus {
   build_version?: string | null;
   time?: string | null;
   scanner_status?: string | null;
+  sidecar?: SidecarStatus | null;
 }
 
 export interface AdminOverview {

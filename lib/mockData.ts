@@ -756,16 +756,19 @@ export const notifications: Notification[] = [
 // ---------------- system ----------------
 export const systemStatus: SystemStatus = {
   providers: [
-    { provider: "upbit", freshness: "FRESH", last_run_at: isoMinutesAgo(1) },
-    { provider: "binance", freshness: "FRESH", last_run_at: isoMinutesAgo(1) },
-    { provider: "coingecko", freshness: "FRESH", last_run_at: isoMinutesAgo(3) },
-    { provider: "defillama", freshness: "FRESH", last_run_at: isoMinutesAgo(2) },
-    { provider: "yfinance", freshness: "DELAYED", last_run_at: isoMinutesAgo(28) },
-    { provider: "pykrx", freshness: "FRESH", last_run_at: isoMinutesAgo(5) },
-    { provider: "bybit", freshness: "FRESH", last_run_at: isoMinutesAgo(2) },
+    { provider: "upbit", freshness: "FRESH", source: "REAL", last_run_at: isoMinutesAgo(1) },
+    { provider: "binance", freshness: "FRESH", source: "REAL", last_run_at: isoMinutesAgo(1) },
+    { provider: "coingecko", freshness: "FRESH", source: "REAL", last_run_at: isoMinutesAgo(3) },
+    { provider: "defillama", freshness: "FRESH", source: "REAL", last_run_at: isoMinutesAgo(2) },
+    // 목업은 사이드카가 없으므로 주식/텔레그램은 합성 스텁으로 표시(계약 시연).
+    { provider: "yfinance", freshness: "DELAYED", source: "STUB", last_run_at: isoMinutesAgo(28) },
+    { provider: "pykrx", freshness: "FRESH", source: "STUB", last_run_at: isoMinutesAgo(5) },
+    { provider: "bybit", freshness: "FRESH", source: "REAL", last_run_at: isoMinutesAgo(2) },
+    { provider: "telegram", freshness: "DELAYED", source: "STUB", last_run_at: isoMinutesAgo(40) },
   ],
   build_version: BUILD_VERSION,
   time: new Date().toISOString(),
+  sidecar: { healthy: false, url: "http://localhost:8099" },
 };
 
 // ---------------- backtest (백테스트) ----------------

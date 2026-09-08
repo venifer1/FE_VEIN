@@ -51,6 +51,24 @@ const NOTIF_LABEL: Record<string, { text: string; variant: "default" | "secondar
   FAILED: { text: "실패", variant: "destructive" },
 };
 
+// 데이터 출처 배지(R40). 실데이터(직접 API) vs 합성 스텁(사이드카 다운 폴백)을 명시해
+// 가짜 데이터를 진짜로 착각하는 것을 막는다.
+function SourceBadge({ source }: { source?: string | null }) {
+  if (!source) return null;
+  if (source === "STUB") {
+    return (
+      <span className="rounded border border-amber-500/40 bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
+        합성
+      </span>
+    );
+  }
+  return (
+    <span className="rounded border border-border bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+      실데이터
+    </span>
+  );
+}
+
 function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof Bell }) {
   return (
     <div className="rounded-md border border-border p-3">
@@ -402,10 +420,19 @@ function SettingsInner() {
               <ErrorState error={status.error} onRetry={() => status.refetch()} title="상태 API 호출 실패" />
             ) : (
               <div className="space-y-2 text-sm">
+                {status.data?.sidecar && !status.data.sidecar.healthy && (
+                  <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs leading-snug text-amber-600">
+                    ⚠ 사이드카 다운 — 미국·한국 주식·텔레그램 속보가 <b>합성 스텁</b>으로 대체되고 있습니다.
+                    아래 <b>합성</b> 배지가 붙은 항목은 실데이터가 아닙니다.
+                  </div>
+                )}
                 {status.data?.providers?.map((p) => (
-                  <div key={p.provider} className="flex items-center justify-between">
-                    <span>{p.provider}</span>
-                    <FreshnessBadge freshness={p.freshness} updatedAt={p.last_run_at} />
+                  <div key={p.provider} className="flex items-center justify-between gap-2">
+                    <span className="min-w-0 truncate">{p.provider}</span>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <SourceBadge source={p.source} />
+                      <FreshnessBadge freshness={p.freshness} updatedAt={p.last_run_at} />
+                    </div>
                   </div>
                 ))}
                 {status.data?.scanner_status && (
