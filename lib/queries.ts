@@ -385,7 +385,11 @@ export function useSaveScannerRule() {
       const resp = await api.post<Envelope<ScannerRule>>("/scanner/rules", request);
       return resp.data.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["scanner-rules"] }),
+    // 저장식 개수가 바뀌면 구독 사용량(used)도 달라지므로 함께 무효화(R75).
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["scanner-rules"] });
+      qc.invalidateQueries({ queryKey: ["entitlements"] });
+    },
   });
 }
 
@@ -395,7 +399,10 @@ export function useDeleteScannerRule() {
     mutationFn: async (id: number) => {
       await api.delete(`/scanner/rules/${id}`);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["scanner-rules"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["scanner-rules"] });
+      qc.invalidateQueries({ queryKey: ["entitlements"] });
+    },
   });
 }
 

@@ -12,6 +12,7 @@ import { EmptyState, ErrorState } from "@/components/states";
 import { extractError } from "@/lib/api";
 import {
   useDeleteScannerRule,
+  useEntitlements,
   useRunConditionScan,
   useSaveScannerRule,
   useScannerRules,
@@ -124,6 +125,7 @@ export function ConditionScannerPanel() {
   const remove = useDeleteScannerRule();
   const update = useUpdateScannerRule();
   const simulate = useSimulateScannerRule();
+  const entitlements = useEntitlements();
 
   const request: ConditionScanRequest = {
     market,
@@ -140,6 +142,13 @@ export function ConditionScannerPanel() {
     () => [...(rules.data ?? [])].sort((a, b) => Number(b.enabled) - Number(a.enabled) || b.id - a.id),
     [rules.data],
   );
+
+  // 저장식 한도(Track C, R52) 선제 안내: 402를 맞기 전에 남은 슬롯을 보여준다.
+  // 현재 개수는 서버 집계(staleTime)보다 목록 길이가 즉각적이라 라이브 값을 쓴다.
+  const scannerFeature = entitlements.data?.features.find((f) => f.key === "SAVED_SCANNER_RULES");
+  const ruleLimit = scannerFeature?.limit ?? -1; // -1 = 무제한(PRO)
+  const usedRules = sortedRules.length;
+  const atRuleLimit = ruleLimit >= 0 && usedRules >= ruleLimit;
 
   const updateCondition = (index: number, patch: Partial<ScannerCondition>) => {
     setConditions((current) => current.map((item, i) => {
@@ -304,12 +313,27 @@ export function ConditionScannerPanel() {
             />
             <Button
               variant="secondary"
-              disabled={!ruleName.trim() || save.isPending}
+              disabled={!ruleName.trim() || save.isPending || atRuleLimit}
               onClick={() => save.mutate({ ...request, name: ruleName.trim() })}
             >
               {save.isPending ? "저장 중" : "저장"}
             </Button>
           </div>
+          {atRuleLimit ? (
+            <p className="text-xs text-amber-600">
+              FREE 플랜은 검색식을 최대 {ruleLimit}개까지 저장할 수 있어요. 기존 검색식을 지우거나{" "}
+              <Link href="/settings" className="underline underline-offset-2">
+                PRO로 업그레이드
+              </Link>
+              하세요.
+            </p>
+          ) : (
+            ruleLimit >= 0 && (
+              <p className="text-xs text-muted-foreground">
+                저장식 {usedRules}/{ruleLimit}개 사용 중
+              </p>
+            )
+          )}
           {save.isError && (
             <p className="text-xs text-destructive">
               {extractError(save.error).message || "저장에 실패했습니다."}
@@ -365,7 +389,9 @@ export function ConditionScannerPanel() {
         <CardContent className="space-y-2">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold">저장된 검색식</h2>
-            <Badge variant="secondary">{sortedRules.length}</Badge>
+            <Badge variant={atRuleLimit ? "warning" : "secondary"}>
+              {ruleLimit >= 0 ? `${usedRules}/${ruleLimit}` : usedRules}
+            </Badge>
           </div>
           {rules.isError ? (
             <ErrorState error={rules.error} onRetry={() => rules.refetch()} />
