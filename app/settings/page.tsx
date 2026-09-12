@@ -337,16 +337,37 @@ function HourSelect({ value, onChange, disabled }: { value: number; onChange: (h
 // 알림 다이제스트(읽기 시점 요약). R41 신호 큐레이션·R42 조용한 시간에 이어, 자리를 비운
 // 사이 온 알림을 분류별로 한 줄 요약한다. 저장 데이터를 바꾸지 않는 순수 조회.
 function NotificationDigestCard() {
-  const { data, isLoading, isError, refetch } = useNotificationDigest(24);
+  const [windowHours, setWindowHours] = useState<24 | 168>(24);
+  const { data, isLoading, isError, refetch } = useNotificationDigest(windowHours);
+  const periods: Array<{ value: 24 | 168; label: string }> = [
+    { value: 24, label: "24시간" },
+    { value: 168, label: "7일" },
+  ];
   return (
     <Card>
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold">알림 요약</h2>
-            <p className="mt-1 text-xs text-muted-foreground">최근 24시간 알림을 분류별로 모아봅니다.</p>
+            <p className="mt-1 text-xs text-muted-foreground">최근 알림을 분류별로 모아봅니다.</p>
           </div>
           {data && <Badge variant="secondary" className="tabular-nums">안읽음 {data.unread}</Badge>}
+        </div>
+        <div className="flex gap-1.5">
+          {periods.map((p) => (
+            <button
+              key={p.value}
+              onClick={() => setWindowHours(p.value)}
+              className={cn(
+                "h-7 shrink-0 rounded-md border px-2.5 text-xs",
+                windowHours === p.value
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border text-muted-foreground",
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
         {isLoading ? (
           <Skeleton className="h-14 w-full" />

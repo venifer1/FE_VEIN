@@ -212,7 +212,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle2', timeout: 30000 });
     await sleep(2000);
     const t = await page.evaluate(() => document.body.innerText || '');
-    if (!(t.includes('알림 요약') && t.includes('최근 24시간'))) {
+    if (!(t.includes('알림 요약') && t.includes('24시간') && t.includes('7일'))) {
       errors.push({ route: routeRef.v, type: 'missing-digest', text: 'Notification digest card not found' });
     }
     // Subscription card (Track C R52): tier + limits shown on settings.
