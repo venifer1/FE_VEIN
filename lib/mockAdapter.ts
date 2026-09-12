@@ -1057,6 +1057,12 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     if (b.enabled != null) a.enabled = b.enabled;
     return ok(config, a);
   }
+  if (alertPatch && method === "delete") {
+    const i = mockAlerts.findIndex((x) => x.alert_id === alertPatch[1]);
+    if (i < 0) fail(config, 404, "ALERT_NOT_FOUND", "알림 규칙을 찾을 수 없습니다.");
+    mockAlerts.splice(i, 1);
+    return ok(config, null);
+  }
 
   // ----- notifications -----
   if (path === "/notifications" && method === "get") {

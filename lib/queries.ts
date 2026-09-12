@@ -1119,6 +1119,19 @@ export function useUpdateAlert() {
   });
 }
 
+export function useDeleteAlert() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string | number) => {
+      await api.delete(`/alerts/${id}`);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["alerts"] });
+      qc.invalidateQueries({ queryKey: ["entitlements"] });
+    },
+  });
+}
+
 export function useAlerts() {
   return useQuery({
     queryKey: ["alerts"],

@@ -20,6 +20,7 @@ import {
   useLogout,
   useAlerts,
   useUpdateAlert,
+  useDeleteAlert,
   useNotifications,
   useMarkRead,
   useWebPushConfig,
@@ -114,6 +115,7 @@ function NotificationRow({ n, onRead }: { n: Notification; onRead: () => void })
 
 function AlertRuleRow({ alert }: { alert: Alert }) {
   const update = useUpdateAlert();
+  const del = useDeleteAlert();
   const [cooldown, setCooldown] = useState(String(alert.cooldown_sec));
   const [editing, setEditing] = useState(false);
 
@@ -154,9 +156,23 @@ function AlertRuleRow({ alert }: { alert: Alert }) {
             </Button>
           </>
         ) : (
-          <button className="text-xs text-muted-foreground underline" onClick={() => setEditing(true)}>
-            쿨다운 수정
-          </button>
+          <>
+            <button className="text-xs text-muted-foreground underline" onClick={() => setEditing(true)}>
+              쿨다운 수정
+            </button>
+            <button
+              className="ml-auto text-xs text-destructive underline disabled:opacity-50"
+              disabled={del.isPending}
+              onClick={() => {
+                const label = alert.symbol ?? `#${alert.instrument_id}`;
+                if (window.confirm(`${label} ${alert.signal_type} 알림 규칙을 삭제할까요?`)) {
+                  del.mutate(alert.alert_id);
+                }
+              }}
+            >
+              삭제
+            </button>
+          </>
         )}
       </div>
     </div>
