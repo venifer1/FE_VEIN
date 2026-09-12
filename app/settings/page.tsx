@@ -264,8 +264,8 @@ function WebNotificationSettings({ notifications }: { notifications: Notificatio
   );
 }
 
-// 조용한 시간(R42, 알림 노이즈 완화). 설정한 KST 시간대(자정 넘김 지원) 동안엔 새 알림을
-// 만들지 않는다. 자는 사이 쌓이는 핑을 줄이고, 창이 끝나면 후속 신호가 정상 알림.
+// 조용한 시간(R42) + 스풀링(R46). 설정한 KST 시간대(자정 넘김 지원)에 온 알림은 드롭되지 않고
+// 창이 끝날 때까지 보류됐다가 자연히 도착한다. 자는 사이 핑은 줄이되 알림은 놓치지 않는다.
 function QuietHoursCard() {
   const { data, isLoading } = useNotificationPrefs();
   const update = useUpdateNotificationPrefs();
@@ -282,7 +282,7 @@ function QuietHoursCard() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold">조용한 시간</h2>
-            <p className="mt-1 text-xs text-muted-foreground">이 시간대(KST)에는 새 알림을 만들지 않습니다.</p>
+            <p className="mt-1 text-xs text-muted-foreground">이 시간대(KST)에 온 알림은 보류됐다가 창이 끝나면 도착합니다.</p>
           </div>
           <Switch
             checked={enabled}
