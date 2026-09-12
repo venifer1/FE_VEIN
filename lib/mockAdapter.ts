@@ -1165,7 +1165,11 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     const feedbackTotal = explainFeedback.size;
     return ok(config, {
       generated_at: new Date().toISOString(),
-      users: { total: mockUsers.length, by_status: countBy(mockUsers, (u) => u.status) },
+      users: {
+        total: mockUsers.length,
+        by_status: countBy(mockUsers, (u) => u.status),
+        by_tier: countBy(mockUsers, (u) => String(u.tier ?? "FREE").toUpperCase()),
+      },
       alerts: {
         total: mockAlerts.length,
         enabled: mockAlerts.filter((a) => a.enabled).length,

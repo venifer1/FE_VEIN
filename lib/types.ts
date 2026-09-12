@@ -1065,6 +1065,7 @@ export interface AdminOverview {
   users: {
     total: number;
     by_status: Record<string, number>;
+    by_tier?: Record<string, number>; // FREE/PRO (R72)
   };
   alerts: {
     total: number;

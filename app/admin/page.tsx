@@ -262,6 +262,7 @@ function AdminInner() {
   };
 
   const pendingUsers = data?.users.by_status?.PENDING ?? 0;
+  const proUsers = data?.users.by_tier?.PRO ?? 0;
   const failedDeliveryCount = data?.notifications.failed_deliveries ?? failedDeliveries.data?.length ?? 0;
   const activeScannerMatches = data?.scanner_rules.active_matches ?? 0;
 
@@ -296,7 +297,7 @@ function AdminInner() {
         ) : data ? (
           <>
             <div className="grid grid-cols-2 gap-2">
-              <StatCard title="사용자" value={fmt(data.users.total)} sub={`대기 ${fmt(pendingUsers)}`} icon={Users} tone={pendingUsers > 0 ? "warning" : "default"} />
+              <StatCard title="사용자" value={fmt(data.users.total)} sub={`대기 ${fmt(pendingUsers)} · PRO ${fmt(proUsers)}`} icon={Users} tone={pendingUsers > 0 ? "warning" : "default"} />
               <StatCard
                 title="알림 규칙"
                 value={fmt(data.alerts.total)}
@@ -357,6 +358,7 @@ function AdminInner() {
             </Card>
 
             <Distribution title="사용자 상태" rows={data.users.by_status} />
+            {data.users.by_tier && <Distribution title="구독 티어" rows={data.users.by_tier} />}
             <Distribution title="신호 상태" rows={data.signals.by_status} />
           </>
         ) : null}
