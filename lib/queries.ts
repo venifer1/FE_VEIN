@@ -35,6 +35,7 @@ import type {
   MarketIndexRow,
   NewsItem,
   NewsSource,
+  Entitlements,
   Notification,
   NotificationDigest,
   NotificationPrefs,
@@ -951,6 +952,19 @@ export function useNotifications(unreadOnly = false, enabled = true) {
         params: { unread_only: unreadOnly || undefined },
       });
       return resp.data;
+    },
+  });
+}
+
+// 구독 엔타이틀먼트(Track C, R52). 현재 티어와 기능/한도.
+export function useEntitlements(enabled = true) {
+  return useQuery({
+    queryKey: ["entitlements"],
+    enabled,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<Entitlements>>("/me/entitlements");
+      return resp.data.data;
     },
   });
 }

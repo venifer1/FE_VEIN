@@ -28,6 +28,7 @@ import {
   useNotificationPrefs,
   useUpdateNotificationPrefs,
   useNotificationDigest,
+  useEntitlements,
 } from "@/lib/queries";
 import { useAuthStore } from "@/store/auth";
 import { formatRelative, formatTime } from "@/lib/format";
@@ -356,6 +357,11 @@ function NotificationDigestCard() {
         ) : (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">{data.summary}</p>
+            {data.released > 0 && (
+              <p className="text-xs text-amber-600">
+                조용한 시간에 보류됐다 방금 도착: {data.released}건
+              </p>
+            )}
             {data.categories.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {data.categories.map((c) => (
@@ -495,6 +501,51 @@ function AlertCenter({
   );
 }
 
+// 구독(Track C, R52). 현재 티어와 기능/한도 표시. 결제 연동은 후속이라 업그레이드는 준비중.
+function SubscriptionCard() {
+  const { data, isLoading } = useEntitlements();
+  const fmtLimit = (n: number) => (n < 0 ? "무제한" : `${n}개`);
+  return (
+    <Card>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">구독</h2>
+            <p className="mt-1 text-xs text-muted-foreground">플랜별로 사용 한도가 다릅니다.</p>
+          </div>
+          {data && (
+            <Badge variant={data.pro ? "default" : "secondary"}>{data.pro ? "PRO" : "FREE"}</Badge>
+          )}
+        </div>
+        {isLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : !data ? (
+          <EmptyState title="구독 정보를 불러올 수 없습니다" />
+        ) : (
+          <div className="space-y-2">
+            <ul className="space-y-1">
+              {data.features.map((f) => (
+                <li key={f.key} className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{f.label}</span>
+                  <span className="font-medium tabular-nums">{fmtLimit(f.limit)}</span>
+                </li>
+              ))}
+            </ul>
+            {!data.pro && (
+              <button
+                disabled
+                className="w-full rounded-md border border-border py-2 text-xs text-muted-foreground"
+              >
+                PRO 업그레이드 (준비 중)
+              </button>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function SettingsInner() {
   const router = useRouter();
   const status = useSystemStatus();
@@ -573,6 +624,8 @@ function SettingsInner() {
             )}
           </CardContent>
         </Card>
+
+        <SubscriptionCard />
 
         <Card>
           <CardContent className="space-y-1">

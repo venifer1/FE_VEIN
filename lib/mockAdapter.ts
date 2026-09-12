@@ -106,6 +106,7 @@ function buildNotificationDigest(all: Notification[], windowHours: number): Noti
     .map(([key, label]) => ({ category: key, label, total: acc.get(key)!.total, unread: acc.get(key)!.unread }));
   const total = rows.length;
   const unread = rows.filter(isUnread).length;
+  const released = 0; // 목업엔 조용한 시간 보류 데이터가 없음(스풀링은 라이브 전용 흐름)
   const recent = rows.filter(isUnread).slice(0, 5);
   const summary =
     total === 0
@@ -117,6 +118,7 @@ function buildNotificationDigest(all: Notification[], windowHours: number): Noti
     generated_at: new Date().toISOString(),
     total,
     unread,
+    released,
     categories,
     recent,
     summary,
@@ -341,6 +343,16 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       quiet_end_hour: Number(b.quiet_end_hour ?? 8),
     };
     return ok(config, mockNotificationPrefs);
+  }
+  if (path === "/me/entitlements" && method === "get") {
+    return ok(config, {
+      tier: "FREE",
+      pro: false,
+      features: [
+        { key: "SAVED_SCANNER_RULES", label: "저장 조건검색식", limit: 3 },
+        { key: "ALERTS", label: "신호 알림 규칙", limit: 10 },
+      ],
+    });
   }
   if (path === "/me/onboarding" && method === "get") {
     return ok(config, buildOnboarding());

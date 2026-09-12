@@ -981,6 +981,19 @@ export interface WebPushConfig {
   public_key?: string | null;
 }
 
+// ----- 구독 엔타이틀먼트 (GET /me/entitlements, Track C R52) -----
+export interface EntitlementFeature {
+  key: string;
+  label: string;
+  limit: number; // -1 = 무제한
+}
+
+export interface Entitlements {
+  tier: "FREE" | "PRO" | string;
+  pro: boolean;
+  features: EntitlementFeature[];
+}
+
 // ----- 온보딩 "시작하기" 체크리스트 (GET /me/onboarding) -----
 export interface OnboardingStep {
   key: string;
@@ -1010,6 +1023,7 @@ export interface NotificationDigest {
   generated_at: string;
   total: number;
   unread: number;
+  released: number; // 조용한 시간에 보류됐다 창 안에 방출된 건수(R51)
   categories: NotificationDigestCategory[];
   recent: Notification[];
   summary: string;

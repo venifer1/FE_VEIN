@@ -211,12 +211,13 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   try {
     await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle2', timeout: 30000 });
     await sleep(2000);
-    const hasDigest = await page.evaluate(() => {
-      const t = document.body.innerText || '';
-      return t.includes('알림 요약') && t.includes('최근 24시간');
-    });
-    if (!hasDigest) {
+    const t = await page.evaluate(() => document.body.innerText || '');
+    if (!(t.includes('알림 요약') && t.includes('최근 24시간'))) {
       errors.push({ route: routeRef.v, type: 'missing-digest', text: 'Notification digest card not found' });
+    }
+    // Subscription card (Track C R52): tier + limits shown on settings.
+    if (!(t.includes('구독') && (t.includes('FREE') || t.includes('PRO')))) {
+      errors.push({ route: 'entitlements', type: 'missing-subscription', text: 'Subscription card not found' });
     }
     await page.screenshot({ path: `${OUT}\\notification_digest.png`, fullPage: true }).catch(() => {});
   } catch (e) {
