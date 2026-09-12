@@ -82,6 +82,12 @@ export function SignalFilterBar({
           완성 임박만
         </Chip>
         <Chip
+          active={!!filter.watchlist_only}
+          onClick={() => onChange({ ...filter, watchlist_only: !filter.watchlist_only })}
+        >
+          관심종목만
+        </Chip>
+        <Chip
           active={filter.active_only === false}
           onClick={() => onChange({ ...filter, active_only: filter.active_only === false ? true : false })}
         >

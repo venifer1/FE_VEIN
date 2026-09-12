@@ -28,7 +28,7 @@ import {
   type SignalType,
 } from "@/lib/types";
 
-const FILTER_QUERY_KEYS = ["type", "market", "timeframe", "near_only", "all"] as const;
+const FILTER_QUERY_KEYS = ["type", "market", "timeframe", "near_only", "all", "watch"] as const;
 
 // 스캘핑 지표 표시용: 들쭉날쭉한 소수 자릿수를 2자리로 통일(예: 4.207842 → 4.21).
 function n2(v?: string | number | null): string {
@@ -52,6 +52,7 @@ function filterFromSearchParams(searchParams: { get: (name: string) => string | 
     market,
     timeframe,
     near_only: searchParams.get("near_only") === "true" || undefined,
+    watchlist_only: searchParams.get("watch") === "true" || undefined,
     // 기본은 활성 신호만(만료·무효 숨김). ?all=true면 전체 상태 노출. (R54)
     active_only: searchParams.get("all") === "true" ? false : true,
   };
@@ -63,6 +64,7 @@ function setFilterSearchParams(searchParams: URLSearchParams, filter: SignalFilt
   if (filter.market) searchParams.set("market", filter.market);
   if (filter.timeframe) searchParams.set("timeframe", filter.timeframe);
   if (filter.near_only) searchParams.set("near_only", "true");
+  if (filter.watchlist_only) searchParams.set("watch", "true");
   if (filter.active_only === false) searchParams.set("all", "true");
   return searchParams;
 }
@@ -133,7 +135,7 @@ function PatternScanner() {
   const signals = pages.flatMap((p) => p.data);
   const freshness = (pages[0]?.meta?.freshness as Freshness | undefined) ?? undefined;
   const isStale = freshness === "DELAYED";
-  const hasFilter = !!(filter.type || filter.market || filter.timeframe || filter.near_only);
+  const hasFilter = !!(filter.type || filter.market || filter.timeframe || filter.near_only || filter.watchlist_only);
 
   return (
     <div>
