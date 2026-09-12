@@ -10,6 +10,12 @@ import { formatPrice, formatRelative, formatScore } from "@/lib/format";
 
 export function SignalCard({ signal }: { signal: Signal }) {
   const showCTarget = (signal.type === "ABC" || signal.type === "TOP") && signal.c_target;
+  // 현재가 대비 C 목표까지 거리(%). 한눈에 남은 상승/하락폭을 본다. (R66)
+  const cur = Number(signal.current_price);
+  const cTargetPct =
+    showCTarget && Number.isFinite(cur) && cur !== 0
+      ? ((Number(signal.c_target) - cur) / cur) * 100
+      : null;
   return (
     <Link href={`/signals/${signalPathId(signal.id)}`} className="block">
       <Card className="transition-colors hover:bg-accent/40">
@@ -34,7 +40,12 @@ export function SignalCard({ signal }: { signal: Signal }) {
               {showCTarget && (
                 <>
                   <span>·</span>
-                  <span className="text-[hsl(var(--success))]">C {formatPrice(signal.c_target)}</span>
+                  <span className="text-[hsl(var(--success))]">
+                    C {formatPrice(signal.c_target)}
+                    {cTargetPct != null && Number.isFinite(cTargetPct)
+                      ? ` (${cTargetPct >= 0 ? "+" : ""}${cTargetPct.toFixed(1)}%)`
+                      : ""}
+                  </span>
                 </>
               )}
             </div>
