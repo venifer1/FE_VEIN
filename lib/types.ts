@@ -331,6 +331,9 @@ export interface Evidence {
 export interface Invalidation {
   rule?: string | null;
   price?: string | null;
+  // 저가-이탈 규칙(ABC/TOP)에만 존재(R77). 실제 발동가 = price × (1 − buffer_pct), R53 완충.
+  buffer_pct?: string | null;
+  effective_price?: string | null;
 }
 
 export interface ChartRange {

@@ -538,14 +538,34 @@ function DetailInner() {
                   <span className="font-mono">{signal.invalidation?.rule ?? "-"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">무효화 가격</span>
+                  <span className="text-muted-foreground">기준선</span>
                   <span className="font-mono">{formatPrice(signal.invalidation?.price)}</span>
                 </div>
+                {signal.invalidation?.effective_price && (
+                  <>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">
+                        실질 무효화가
+                        {signal.invalidation?.buffer_pct
+                          ? ` (−${(Number(signal.invalidation.buffer_pct) * 100).toFixed(1)}% 완충)`
+                          : ""}
+                      </span>
+                      <span className="font-mono text-red-500">
+                        {formatPrice(signal.invalidation.effective_price)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      기준선을 살짝 이탈하는 노이즈성 하락은 무효화하지 않고, 저가가 실질 무효화가
+                      아래로 내려가야 무효 처리됩니다(R53).
+                    </p>
+                  </>
+                )}
                 {(() => {
                   // 리스크·리워드(R66 후속): 현재가 대비 목표/무효화 거리 + 손익비. ABC/TOP만.
                   const cur = Number(signal.current_price);
                   const tgt = Number(signal.c_target);
-                  const inv = Number(signal.invalidation?.price);
+                  // 실제 손실 지점은 완충 적용된 실질 무효화가 → 있으면 그걸로 거리·손익비 계산(R77).
+                  const inv = Number(signal.invalidation?.effective_price ?? signal.invalidation?.price);
                   const ok =
                     (signal.type === "ABC" || signal.type === "TOP") &&
                     Number.isFinite(cur) && cur !== 0 && Number.isFinite(tgt) && Number.isFinite(inv);

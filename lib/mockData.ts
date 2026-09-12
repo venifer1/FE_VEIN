@@ -281,7 +281,15 @@ function abcEvidence(instrumentId: string, timeframe: Timeframe, invert = false)
       { type: "PIVOT_B" as const, candle_time: c[iB].open_time, price: pB, sequence_no: 2 },
       { type: "C_TARGET" as const, candle_time: c[n - 1].open_time, price: cTarget, sequence_no: 3 },
     ],
-    invalidation: { rule: invert ? "B_HIGH_BREAK" : "A_LOW_BREAK", price: pA },
+    // 저가-이탈 규칙(A_LOW_BREAK)에만 R53 완충 적용 → 실질가 노출(R77). 반전(고점) 규칙엔 없음.
+    invalidation: invert
+      ? { rule: "B_HIGH_BREAK", price: pA }
+      : {
+          rule: "A_LOW_BREAK",
+          price: pA,
+          buffer_pct: "0.03",
+          effective_price: (Number(pA) * 0.97).toFixed(2),
+        },
   };
 }
 
