@@ -303,6 +303,29 @@ export const mockAdapter: AxiosAdapter = async (config) => {
   const method = (config.method ?? "get").toLowerCase();
   const { path, params } = parseUrl(config);
 
+  // ----- public content (비로그인 landing) -----
+  if (path === "/public/reports/weekly" && method === "get") {
+    const windowDays = Number(params.get("window_days") ?? 90) || 90;
+    return ok(config, {
+      generated_at: new Date().toISOString(),
+      window_days: windowDays,
+      horizon: "1d",
+      overall: { sample_size: 128, hit_rate: "62.5", avg_return_pct: "1.84" },
+      rows: [
+        { type: "ABC", market: "CRYPTO", timeframe: "4h", sample_size: 41, hit_rate: "65.9", avg_return_pct: "2.31", median_return_pct: "1.90" },
+        { type: "IMALOL", market: "CRYPTO", timeframe: "1d", sample_size: 33, hit_rate: "60.6", avg_return_pct: "1.72", median_return_pct: "1.40" },
+        { type: "TOP", market: "US", timeframe: "1d", sample_size: 28, hit_rate: "57.1", avg_return_pct: "1.35", median_return_pct: "1.10" },
+        { type: "ABC", market: "KOSPI", timeframe: "1d", sample_size: 16, hit_rate: "62.5", avg_return_pct: "1.55", median_return_pct: "1.20" },
+        { type: "IMALOL", market: "KOSDAQ", timeframe: "1d", sample_size: 10, hit_rate: "60.0", avg_return_pct: "1.28", median_return_pct: "0.95" },
+      ],
+      highlights: [
+        { kind: "BEST", label: "최고 적중", type: "ABC", market: "CRYPTO", timeframe: "4h", sample_size: 41, hit_rate: "65.9", avg_return_pct: "2.31" },
+        { kind: "WORST", label: "최저 적중", type: "IMALOL", market: "KOSDAQ", timeframe: "1d", sample_size: 10, hit_rate: "60.0", avg_return_pct: "1.28" },
+      ],
+      disclaimer: "투자 참고용 · 투자권유 아님. 과거 통계이며 미래 수익을 보장하지 않습니다.",
+    });
+  }
+
   // ----- auth -----
   if (path === "/auth/login" && method === "post") {
     const { email, password } = body(config);
@@ -315,6 +338,20 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       refresh_token: "mock-refresh-token",
       expires_in: 900,
       user: { id: "usr_1", email, role: "TESTER", status: "APPROVED" },
+    });
+  }
+  if (path === "/auth/signup" && method === "post") {
+    const { email, password } = body(config);
+    if (!email || !password || String(password).length < 8) {
+      fail(config, 400, "VALIDATION_ERROR", "이메일과 8자 이상 비밀번호가 필요합니다.");
+    }
+    // 목: auto-approve로 즉시 토큰 발급(백엔드 vein.signup.auto-approve 기본 true와 동형).
+    return ok(config, {
+      status: "APPROVED",
+      user: { id: "usr_new", email, role: "TESTER", status: "APPROVED", tier: "FREE" },
+      access_token: "mock-access-token",
+      refresh_token: "mock-refresh-token",
+      expires_in: 900,
     });
   }
   if (path === "/auth/refresh" && method === "post") {
