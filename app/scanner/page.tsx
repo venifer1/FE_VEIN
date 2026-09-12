@@ -162,6 +162,14 @@ function PatternScanner() {
           />
         ) : (
           <>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span className="tabular-nums">{signals.length}개 신호{hasNextPage ? "+" : ""}</span>
+              {hasFilter && (
+                <button className="underline hover:text-foreground" onClick={() => setFilter({})}>
+                  필터 초기화
+                </button>
+              )}
+            </div>
             {signals.map((s) => (
               <SignalCard key={s.id} signal={s} />
             ))}
