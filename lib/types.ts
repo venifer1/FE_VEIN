@@ -93,6 +93,7 @@ export interface User {
   email: string;
   role: string;
   status: UserStatus;
+  tier?: "FREE" | "PRO" | string | null; // 구독 티어(R56)
 }
 
 export interface AuthTokens {

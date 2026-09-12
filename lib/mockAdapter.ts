@@ -129,9 +129,9 @@ const trace = () => `mock-${Math.random().toString(36).slice(2, 10)}`;
 const explainFeedback = new Map<string, { helpful: boolean; reason?: string }>();
 const scannerRules: ScannerRule[] = [];
 const mockUsers: User[] = [
-  { id: "usr_1", email: "tester@vein.test", role: "SUPER_ADMIN", status: "APPROVED" },
-  { id: "usr_2", email: "pending@vein.test", role: "TESTER", status: "PENDING" },
-  { id: "usr_3", email: "locked@vein.test", role: "TESTER", status: "LOCKED" },
+  { id: "usr_1", email: "tester@vein.test", role: "SUPER_ADMIN", status: "APPROVED", tier: "PRO" },
+  { id: "usr_2", email: "pending@vein.test", role: "TESTER", status: "PENDING", tier: "FREE" },
+  { id: "usr_3", email: "locked@vein.test", role: "TESTER", status: "LOCKED", tier: "FREE" },
 ];
 const mockAuditLogs: any[] = [];
 let paperAccountSeq = 1;
@@ -1178,6 +1178,15 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       detail: JSON.stringify({ email: user.email, from, to: user.status }),
       created_at: new Date().toISOString(),
     });
+    return ok(config, user);
+  }
+  const adminTier = path.match(/^\/admin\/users\/([^/]+)\/tier$/);
+  if (adminTier && method === "patch") {
+    const user = mockUsers.find((u) => String(u.id) === adminTier[1]);
+    if (!user) fail(config, 404, "NOT_FOUND", "User not found.");
+    const next = String(body(config).tier ?? "").toUpperCase();
+    if (next !== "FREE" && next !== "PRO") fail(config, 400, "VALIDATION_ERROR", "tier must be FREE or PRO");
+    user.tier = next;
     return ok(config, user);
   }
   if (path === "/admin/audit-logs" && method === "get") {

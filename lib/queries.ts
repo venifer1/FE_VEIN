@@ -1251,6 +1251,22 @@ export function useAdminLockUser() {
   });
 }
 
+// 구독 티어 설정(R56). admin이 사용자 FREE↔PRO 전환.
+export function useAdminSetTier() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, tier }: { id: string | number; tier: "FREE" | "PRO" }) => {
+      const resp = await api.patch<Envelope<User>>(`/admin/users/${id}/tier`, { tier });
+      return resp.data.data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-audit-logs"] });
+      qc.invalidateQueries({ queryKey: ["entitlements"] });
+    },
+  });
+}
+
 // ============ auth ============
 export function useLogin() {
   return useMutation({

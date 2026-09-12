@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/states";
 import {
   useAdminApproveUser,
+  useAdminSetTier,
   useAdminAuditLogs,
   useAdminFailedDeliveries,
   useAdminLockUser,
@@ -98,8 +99,10 @@ function UserStatusBadge({ status }: { status: UserStatus }) {
 function UserRow({ user, currentUserId }: { user: User; currentUserId?: string | number }) {
   const approve = useAdminApproveUser();
   const lock = useAdminLockUser();
+  const setTier = useAdminSetTier();
   const isSelf = String(user.id) === String(currentUserId ?? "");
-  const busy = approve.isPending || lock.isPending;
+  const isPro = String(user.tier ?? "FREE").toUpperCase() === "PRO";
+  const busy = approve.isPending || lock.isPending || setTier.isPending;
 
   return (
     <Card>
@@ -109,7 +112,10 @@ function UserRow({ user, currentUserId }: { user: User; currentUserId?: string |
             <p className="truncate text-sm font-medium">{user.email}</p>
             <p className="text-xs text-muted-foreground">#{user.id} · {user.role}</p>
           </div>
-          <UserStatusBadge status={user.status} />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Badge variant={isPro ? "default" : "secondary"}>{isPro ? "PRO" : "FREE"}</Badge>
+            <UserStatusBadge status={user.status} />
+          </div>
         </div>
         <div className="flex gap-2">
           <Button
@@ -133,6 +139,14 @@ function UserRow({ user, currentUserId }: { user: User; currentUserId?: string |
           >
             <Lock className="h-3.5 w-3.5" />
             잠금
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={busy}
+            onClick={() => setTier.mutate({ id: user.id, tier: isPro ? "FREE" : "PRO" })}
+          >
+            {isPro ? "FREE로" : "PRO로"}
           </Button>
         </div>
       </CardContent>
