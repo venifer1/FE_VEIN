@@ -337,7 +337,7 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       access_token: "mock-access-token",
       refresh_token: "mock-refresh-token",
       expires_in: 900,
-      user: { id: "usr_1", email, role: "TESTER", status: "APPROVED" },
+      user: { id: "usr_1", email, role: "SUPER_ADMIN", status: "APPROVED" },
     });
   }
   if (path === "/auth/signup" && method === "post") {
@@ -359,14 +359,14 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       access_token: "mock-access-token-rotated",
       refresh_token: "mock-refresh-token-rotated",
       expires_in: 900,
-      user: { id: "usr_1", email: "tester@vein.test", role: "TESTER", status: "APPROVED" },
+      user: { id: "usr_1", email: "tester@vein.test", role: "SUPER_ADMIN", status: "APPROVED" },
     });
   }
   if (path === "/auth/logout" && method === "post") {
     return { data: null, status: 204, statusText: "No Content", headers: {}, config };
   }
   if (path === "/me" && method === "get") {
-    return ok(config, { id: "usr_1", email: "tester@vein.test", role: "TESTER", status: "APPROVED" });
+    return ok(config, { id: "usr_1", email: "tester@vein.test", role: "SUPER_ADMIN", status: "APPROVED" });
   }
   // 알림 환경설정 · 조용한 시간(R42)
   if (path === "/me/notification-prefs" && method === "get") {
