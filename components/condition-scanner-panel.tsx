@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState, ErrorState } from "@/components/states";
+import { extractError } from "@/lib/api";
 import {
   useDeleteScannerRule,
   useRunConditionScan,
@@ -306,9 +307,14 @@ export function ConditionScannerPanel() {
               disabled={!ruleName.trim() || save.isPending}
               onClick={() => save.mutate({ ...request, name: ruleName.trim() })}
             >
-              저장
+              {save.isPending ? "저장 중" : "저장"}
             </Button>
           </div>
+          {save.isError && (
+            <p className="text-xs text-destructive">
+              {extractError(save.error).message || "저장에 실패했습니다."}
+            </p>
+          )}
         </CardContent>
       </Card>
 

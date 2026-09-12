@@ -29,6 +29,12 @@ import {
 } from "@/lib/types";
 
 const FILTER_QUERY_KEYS = ["type", "market", "timeframe", "near_only", "all"] as const;
+
+// 스캘핑 지표 표시용: 들쭉날쭉한 소수 자릿수를 2자리로 통일(예: 4.207842 → 4.21).
+function n2(v?: string | number | null): string {
+  const n = Number(v);
+  return Number.isFinite(n) ? n.toFixed(2) : "-";
+}
 const SIGNAL_TYPES: SignalType[] = ["ABC", "TOP", "IMALOL"];
 const MARKETS: Market[] = ["CRYPTO", "US", "KOSPI", "KOSDAQ"];
 
@@ -195,10 +201,10 @@ function ScalpRanking() {
                     <span className="text-xs text-muted-foreground">{r.name}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground tabular-nums">
-                    <span>스프레드 {r.spread_ticks}틱</span>
-                    <span>TPS {r.tps}</span>
-                    <span>마이크로변동 {r.micro_vol}</span>
-                    <span>불균형 {r.ob_imbalance}</span>
+                    <span>스프레드 {n2(r.spread_ticks)}틱</span>
+                    <span>TPS {n2(r.tps)}</span>
+                    <span>마이크로변동 {n2(r.micro_vol)}</span>
+                    <span>불균형 {n2(r.ob_imbalance)}</span>
                     <span>벽 {r.wall_state}</span>
                   </div>
                 </div>
