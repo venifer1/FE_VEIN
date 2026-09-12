@@ -541,6 +541,37 @@ function DetailInner() {
                   <span className="text-muted-foreground">무효화 가격</span>
                   <span className="font-mono">{formatPrice(signal.invalidation?.price)}</span>
                 </div>
+                {(() => {
+                  // 리스크·리워드(R66 후속): 현재가 대비 목표/무효화 거리 + 손익비. ABC/TOP만.
+                  const cur = Number(signal.current_price);
+                  const tgt = Number(signal.c_target);
+                  const inv = Number(signal.invalidation?.price);
+                  const ok =
+                    (signal.type === "ABC" || signal.type === "TOP") &&
+                    Number.isFinite(cur) && cur !== 0 && Number.isFinite(tgt) && Number.isFinite(inv);
+                  if (!ok) return null;
+                  const up = ((tgt - cur) / cur) * 100;
+                  const down = ((inv - cur) / cur) * 100;
+                  const rr = Math.abs(down) > 0 ? Math.abs(up) / Math.abs(down) : null;
+                  return (
+                    <>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">목표까지</span>
+                        <span className="font-mono text-emerald-600">{up >= 0 ? "+" : ""}{up.toFixed(1)}%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">무효화까지</span>
+                        <span className="font-mono text-red-500">{down >= 0 ? "+" : ""}{down.toFixed(1)}%</span>
+                      </div>
+                      {rr != null && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">손익비(R:R)</span>
+                          <span className="font-mono">{rr.toFixed(2)} : 1</span>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
                 <p className="pt-1 text-xs text-muted-foreground">알고리즘 {signal.algorithm_version}</p>
               </CardContent>
             </Card>
