@@ -156,8 +156,14 @@ function PatternScanner() {
           <ErrorState error={error} onRetry={() => refetch()} />
         ) : signals.length === 0 ? (
           <EmptyState
-            title="조건에 맞는 신호가 없습니다"
-            description={hasFilter ? "필터 조건을 바꾸거나 초기화하세요." : "아직 탐지된 신호가 없습니다."}
+            title={filter.watchlist_only ? "관심종목 신호가 없습니다" : "조건에 맞는 신호가 없습니다"}
+            description={
+              filter.watchlist_only
+                ? "관심종목에 담긴 종목의 신호가 없습니다. 종목을 관심 등록하거나 필터를 끄세요."
+                : hasFilter
+                  ? "필터 조건을 바꾸거나 초기화하세요."
+                  : "아직 탐지된 신호가 없습니다."
+            }
             action={hasFilter ? { label: "필터 초기화", onClick: () => setFilter({}) } : undefined}
           />
         ) : (
