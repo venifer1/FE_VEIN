@@ -190,6 +190,22 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     errors.push({ route: routeRef.v, type: 'nav', text: String(e.message).slice(0, 200) });
   }
 
+  // Data-source banner: this environment runs without the sidecar, so US/KR stocks
+  // and telegram fall back to synthetic stubs → the global warning banner must show.
+  routeRef.v = 'data-source-banner';
+  try {
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle2', timeout: 30000 });
+    await sleep(2000);
+    const bannerShown = await page.evaluate(() =>
+      (document.body.innerText || '').includes('일부 데이터가 합성값입니다'));
+    if (!bannerShown) {
+      errors.push({ route: routeRef.v, type: 'missing-banner', text: 'Data-source stub banner absent while sidecar down' });
+    }
+    await page.screenshot({ path: `${OUT}\\data_source_banner.png` }).catch(() => {});
+  } catch (e) {
+    errors.push({ route: routeRef.v, type: 'nav', text: String(e.message).slice(0, 200) });
+  }
+
   // Exercise the notification digest card + its live GET /notifications/digest.
   routeRef.v = 'notification-digest';
   try {

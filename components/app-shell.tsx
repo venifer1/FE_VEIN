@@ -7,6 +7,7 @@ import { Home, Radar, Newspaper, Database, Settings, ShieldCheck, WalletCards } 
 import { cn } from "@/lib/utils";
 import { useUnreadCount } from "@/lib/queries";
 import { useAuthStore } from "@/store/auth";
+import { DataSourceBanner } from "@/components/data-source";
 
 /**
  * True only after the first client render. Auth state is derived from
@@ -79,10 +80,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-background">
       {showChrome && (
-        <header className="sticky top-0 z-30 flex items-center gap-2 border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
-          <Image src="/vein_logo.svg" alt="VEIN" width={66} height={19} priority />
-          <span className="sr-only">VEIN</span>
-        </header>
+        <div className="sticky top-0 z-30">
+          <header className="flex items-center gap-2 border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
+            <Image src="/vein_logo.svg" alt="VEIN" width={66} height={19} priority />
+            <span className="sr-only">VEIN</span>
+          </header>
+          <DataSourceBanner />
+        </div>
       )}
       <main className={cn("flex-1", showChrome && "pb-20")}>{children}</main>
       <BottomTabs />

@@ -7,6 +7,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { ChartView } from "@/components/chart-view";
 import { SignalCard } from "@/components/signal-card";
 import { FreshnessBadge, MarketBadge, SentimentBadge } from "@/components/badges";
+import { MarketStubBadge } from "@/components/data-source";
 import { Badge } from "@/components/ui/badge";
 import { ErrorState, EmptyState, StaleNotice, ComplianceFooter } from "@/components/states";
 import { Button } from "@/components/ui/button";
@@ -121,6 +122,7 @@ function InstrumentInner() {
                   {instrument?.name || instrument?.symbol || id}
                 </p>
                 {instrument && <MarketBadge market={instrument.market} />}
+                {instrument && <MarketStubBadge market={instrument.market} />}
               </div>
               {instrument?.name && (
                 <p className="text-sm text-muted-foreground">{instrument.symbol}</p>
