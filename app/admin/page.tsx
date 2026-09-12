@@ -125,7 +125,11 @@ function UserRow({ user, currentUserId }: { user: User; currentUserId?: string |
             size="sm"
             variant="outline"
             disabled={busy || user.status === "LOCKED" || isSelf}
-            onClick={() => lock.mutate(user.id)}
+            onClick={() => {
+              if (window.confirm(`${user.email} 계정을 잠글까요? 로그인이 차단됩니다.`)) {
+                lock.mutate(user.id);
+              }
+            }}
           >
             <Lock className="h-3.5 w-3.5" />
             잠금

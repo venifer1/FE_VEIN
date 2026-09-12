@@ -88,6 +88,11 @@ function PerformanceSummaryStrip({ filter }: { filter: SignalFilter }) {
           <span>적중률 {row.hit_rate ?? "-"}%</span>
           <span aria-hidden>·</span>
           <span>평균 {formatPct(row.avg_return_pct)}</span>
+          {(row.sample_size ?? 0) < 20 && (
+            <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-medium text-amber-600">
+              표본 부족 · 참고만
+            </span>
+          )}
         </p>
       )}
     </div>

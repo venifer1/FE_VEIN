@@ -25,6 +25,17 @@ function decimalString(value: number) {
   return value.toFixed(8).replace(/\.?0+$/, "");
 }
 
+// 큰 금액을 사람이 읽는 한글 단위로(예: 10000000 → "1,000만원", 150000000 → "1억 5,000만원").
+function koreanMoney(n: number): string {
+  if (!Number.isFinite(n) || n < 10000) return "";
+  const eok = Math.floor(n / 1e8);
+  const man = Math.floor((n % 1e8) / 1e4);
+  const parts: string[] = [];
+  if (eok) parts.push(`${eok.toLocaleString("ko-KR")}억`);
+  if (man) parts.push(`${man.toLocaleString("ko-KR")}만`);
+  return parts.length ? parts.join(" ") + "원" : "";
+}
+
 function ratioPct(numerator?: string | null, denominator?: string | null) {
   const top = Number(numerator ?? 0);
   const bottom = Number(denominator ?? 0);
@@ -75,7 +86,10 @@ function SectionTabs({ value, onChange }: { value: PaperTab; onChange: (value: P
 
 function AccountSetup() {
   const createAccount = useCreatePaperAccount();
-  const [initialBalance, setInitialBalance] = useState("10000000");
+  const [balanceDigits, setBalanceDigits] = useState("10000000");
+  const amount = Number(balanceDigits || "0");
+  const display = balanceDigits ? amount.toLocaleString("ko-KR") : "";
+  const hint = koreanMoney(amount);
 
   return (
     <Card>
@@ -86,11 +100,23 @@ function AccountSetup() {
             실제 거래소 주문 없이 가상 현금과 포지션만 기록합니다.
           </p>
         </div>
-        <Input inputMode="decimal" value={initialBalance} onChange={(e) => setInitialBalance(e.target.value)} />
+        <div>
+          <div className="relative">
+            <Input
+              inputMode="numeric"
+              value={display}
+              onChange={(e) => setBalanceDigits(e.target.value.replace(/[^\d]/g, "").slice(0, 15))}
+              className="pr-9 tabular-nums"
+              aria-label="초기 잔액(원)"
+            />
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">원</span>
+          </div>
+          {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+        </div>
         <Button
           className="w-full"
-          onClick={() => createAccount.mutate({ initial_balance: initialBalance, base_currency: "KRW" })}
-          disabled={createAccount.isPending}
+          onClick={() => createAccount.mutate({ initial_balance: balanceDigits || "0", base_currency: "KRW" })}
+          disabled={createAccount.isPending || amount <= 0}
         >
           <WalletCards className="h-4 w-4" />
           {createAccount.isPending ? "생성 중" : "계정 생성"}

@@ -376,7 +376,11 @@ export function ConditionScannerPanel() {
                   setRuleName(`${rule.name} 복사`);
                 }}
                 onToggle={() => update.mutate({ id: rule.id, enabled: !rule.enabled })}
-                onDelete={() => remove.mutate(rule.id)}
+                onDelete={() => {
+                  if (window.confirm(`조건검색식 "${rule.name}"을(를) 삭제할까요? 되돌릴 수 없습니다.`)) {
+                    remove.mutate(rule.id);
+                  }
+                }}
                 onSimulate={() => simulate.mutate(rule.id)}
                 busy={update.isPending || remove.isPending || simulate.isPending}
               />
