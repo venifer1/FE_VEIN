@@ -387,6 +387,66 @@ function OrderList({ orders }: { orders: PaperOrder[] }) {
   );
 }
 
+// 모의 계정 리셋(R64). POST /paper/accounts는 create-or-reset이므로 재생성으로 초기화한다.
+// 파괴적이라 접힌 링크 → 펼침 폼 → confirm 2단계.
+function ResetAccountCard() {
+  const createAccount = useCreatePaperAccount();
+  const [open, setOpen] = useState(false);
+  const [balanceDigits, setBalanceDigits] = useState("10000000");
+  const amount = Number(balanceDigits || "0");
+  const display = balanceDigits ? amount.toLocaleString("ko-KR") : "";
+  const hint = koreanMoney(amount);
+
+  if (!open) {
+    return (
+      <div className="pt-1 text-center">
+        <button onClick={() => setOpen(true)} className="text-xs text-muted-foreground underline">
+          계정 리셋
+        </button>
+      </div>
+    );
+  }
+  return (
+    <Card>
+      <CardContent className="space-y-2">
+        <p className="text-sm font-medium">모의 계정 리셋</p>
+        <p className="text-xs text-muted-foreground">모든 포지션·주문·성과가 지워지고 새 잔액으로 다시 시작합니다.</p>
+        <div className="relative">
+          <Input
+            inputMode="numeric"
+            value={display}
+            onChange={(e) => setBalanceDigits(e.target.value.replace(/[^\d]/g, "").slice(0, 15))}
+            className="pr-9 tabular-nums"
+            aria-label="리셋 잔액(원)"
+          />
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">원</span>
+        </div>
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        <div className="flex gap-2">
+          <Button
+            variant="destructive"
+            className="flex-1"
+            disabled={createAccount.isPending || amount <= 0}
+            onClick={() => {
+              if (window.confirm("정말 모의 계정을 리셋할까요? 모든 포지션·주문·성과가 지워집니다.")) {
+                createAccount.mutate(
+                  { initial_balance: balanceDigits || "0", base_currency: "KRW" },
+                  { onSuccess: () => setOpen(false) },
+                );
+              }
+            }}
+          >
+            {createAccount.isPending ? "리셋 중" : "리셋"}
+          </Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            취소
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PaperInner() {
   const [tab, setTab] = useState<PaperTab>("trade");
   const portfolio = usePaperPortfolio();
@@ -434,6 +494,7 @@ function PaperInner() {
             {tab === "trade" && <OrderForm positions={positions} />}
             {tab === "positions" && <PositionList positions={positions} />}
             {tab === "orders" && <OrderList orders={orders} />}
+            <ResetAccountCard />
           </>
         ) : null}
       </div>
