@@ -531,6 +531,7 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     const instrumentId = params.get("instrument_id");
     const watchlistOnly = params.get("watchlist_only") === "true";
     const nearOnly = params.get("near_only") === "true";
+    const activeOnly = params.get("active_only") === "true";
     const cursor = params.get("cursor");
     let list = [...mockSignals];
     if (type) list = list.filter((s) => s.type === type);
@@ -539,6 +540,7 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     if (status) list = list.filter((s) => s.status === status);
     if (instrumentId) list = list.filter((s) => idMatches(s.instrument.id, instrumentId));
     if (nearOnly) list = list.filter((s) => s.status === "NEAR_COMPLETION");
+    if (activeOnly) list = list.filter((s) => s.status === "DETECTED" || s.status === "NEAR_COMPLETION");
     if (watchlistOnly) {
       const ids = new Set(mockWatchlist.items.map((i) => i.instrument.id));
       list = list.filter((s) => ids.has(s.instrument.id));

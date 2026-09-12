@@ -28,7 +28,7 @@ import {
   type SignalType,
 } from "@/lib/types";
 
-const FILTER_QUERY_KEYS = ["type", "market", "timeframe", "near_only"] as const;
+const FILTER_QUERY_KEYS = ["type", "market", "timeframe", "near_only", "all"] as const;
 const SIGNAL_TYPES: SignalType[] = ["ABC", "TOP", "IMALOL"];
 const MARKETS: Market[] = ["CRYPTO", "US", "KOSPI", "KOSDAQ"];
 
@@ -46,6 +46,8 @@ function filterFromSearchParams(searchParams: { get: (name: string) => string | 
     market,
     timeframe,
     near_only: searchParams.get("near_only") === "true" || undefined,
+    // 기본은 활성 신호만(만료·무효 숨김). ?all=true면 전체 상태 노출. (R54)
+    active_only: searchParams.get("all") === "true" ? false : true,
   };
 }
 
@@ -55,6 +57,7 @@ function setFilterSearchParams(searchParams: URLSearchParams, filter: SignalFilt
   if (filter.market) searchParams.set("market", filter.market);
   if (filter.timeframe) searchParams.set("timeframe", filter.timeframe);
   if (filter.near_only) searchParams.set("near_only", "true");
+  if (filter.active_only === false) searchParams.set("all", "true");
   return searchParams;
 }
 

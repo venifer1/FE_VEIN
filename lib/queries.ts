@@ -322,6 +322,7 @@ export interface SignalFilter {
   instrument_id?: string;
   watchlist_only?: boolean;
   near_only?: boolean;
+  active_only?: boolean; // true면 활성(DETECTED/NEAR_COMPLETION)만, 만료·무효 숨김 (R54)
 }
 
 export function useSignals(filter: SignalFilter) {

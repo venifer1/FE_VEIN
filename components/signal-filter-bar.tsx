@@ -81,6 +81,12 @@ export function SignalFilterBar({
         <Chip active={!!filter.near_only} onClick={() => onChange({ ...filter, near_only: !filter.near_only })}>
           완성 임박만
         </Chip>
+        <Chip
+          active={filter.active_only === false}
+          onClick={() => onChange({ ...filter, active_only: filter.active_only === false ? true : false })}
+        >
+          만료 포함
+        </Chip>
       </div>
     </div>
   );
