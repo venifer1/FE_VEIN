@@ -471,9 +471,12 @@ function DetailInner() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                   <span>현재가 {formatPrice(signal.current_price)}</span>
-                  {(signal.type === "ABC" || signal.type === "TOP") && signal.c_target && (
-                    <span className="text-[hsl(var(--success))]">C 목표가 {formatPrice(signal.c_target)}</span>
-                  )}
+                  {(signal.type === "ABC" || signal.type === "TOP" || signal.type === "IMALOL") &&
+                    signal.c_target && (
+                      <span className="text-[hsl(var(--success))]">
+                        {signal.type === "IMALOL" ? "C 예상가" : "C 목표가"} {formatPrice(signal.c_target)}
+                      </span>
+                    )}
                 </div>
                 <p className="text-xs text-muted-foreground">탐지 {formatTime(signal.detected_at)}</p>
               </CardContent>

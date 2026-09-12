@@ -312,7 +312,7 @@ export interface Signal {
   detected_at: string;
   score?: string | null;
   current_price?: string | null;
-  c_target?: string | null; // ABC / TOP
+  c_target?: string | null; // ABC/TOP: C 목표가(c100), IMALOL: C 예상가(투영가)
   subtype?: string | null;
   pivots?: PivotsSummary | null;
   freshness?: Freshness;

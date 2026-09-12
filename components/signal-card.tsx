@@ -9,7 +9,10 @@ import { signalPathId } from "@/lib/types";
 import { formatPrice, formatRelative, formatScore } from "@/lib/format";
 
 export function SignalCard({ signal }: { signal: Signal }) {
-  const showCTarget = (signal.type === "ABC" || signal.type === "TOP") && signal.c_target;
+  // ABC/TOP은 C 목표가(c100), IMALOL은 C 예상가(projectedClose=박스 투영가). 셋 다 전방 목표라
+  // 카드에 거리(%)를 노출한다. (R66=ABC/TOP, R80=IMALOL 확장)
+  const showCTarget =
+    (signal.type === "ABC" || signal.type === "TOP" || signal.type === "IMALOL") && signal.c_target;
   // 현재가 대비 C 목표까지 거리(%). 한눈에 남은 상승/하락폭을 본다. (R66)
   const cur = Number(signal.current_price);
   const cTargetPct =
