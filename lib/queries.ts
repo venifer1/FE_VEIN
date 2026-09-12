@@ -1084,6 +1084,17 @@ export function useMarkRead() {
   });
 }
 
+export function useMarkAllRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const resp = await api.post<Envelope<{ updated: number }>>("/notifications/read-all");
+      return resp.data.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+}
+
 // ============ alerts ============
 export interface CreateAlertInput {
   instrument_id: string;

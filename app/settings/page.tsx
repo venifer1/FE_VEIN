@@ -23,6 +23,7 @@ import {
   useDeleteAlert,
   useNotifications,
   useMarkRead,
+  useMarkAllRead,
   useWebPushConfig,
   useSaveWebPushSubscription,
   useDeleteWebPushSubscription,
@@ -438,6 +439,7 @@ function AlertCenter({
   markRead: ReturnType<typeof useMarkRead>;
 }) {
   const [filter, setFilter] = useState<NotificationFilter>("ALL");
+  const markAllRead = useMarkAllRead();
   const unread = notifications.filter((n) => n.read_at == null && n.status !== "READ").length;
   const failed = notifications.filter((n) => n.status === "FAILED").length;
   const enabledAlerts = alerts.filter((a) => a.enabled).length;
@@ -495,9 +497,20 @@ function AlertCenter({
 
       <Card>
         <CardContent className="space-y-3">
-          <div>
-            <h2 className="text-sm font-semibold">알림함</h2>
-            <p className="mt-1 text-xs text-muted-foreground">최근 알림과 읽음 상태를 확인합니다.</p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">알림함</h2>
+              <p className="mt-1 text-xs text-muted-foreground">최근 알림과 읽음 상태를 확인합니다.</p>
+            </div>
+            {unread > 0 && (
+              <button
+                className="shrink-0 text-xs text-primary underline disabled:opacity-50"
+                disabled={markAllRead.isPending}
+                onClick={() => markAllRead.mutate()}
+              >
+                모두 읽음
+              </button>
+            )}
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {filters.map((item) => (

@@ -1085,6 +1085,17 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     n.status = "READ";
     return ok(config, { read_at: n.read_at });
   }
+  if (path === "/notifications/read-all" && method === "post") {
+    let updated = 0;
+    for (const n of mockNotifications) {
+      if (n.status !== "READ") {
+        n.status = "READ";
+        n.read_at = new Date().toISOString();
+        updated += 1;
+      }
+    }
+    return ok(config, { updated });
+  }
   const notifWebPush = path.match(/^\/notifications\/([^/]+)\/deliveries\/web-push$/);
   if (notifWebPush && method === "post") {
     const n = mockNotifications.find((x) => String(x.id) === notifWebPush[1]);
