@@ -987,6 +987,7 @@ export interface EntitlementFeature {
   key: string;
   label: string;
   limit: number; // -1 = 무제한
+  used: number; // 현재 사용 수(R60)
 }
 
 export interface Entitlements {

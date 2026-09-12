@@ -349,8 +349,8 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       tier: "FREE",
       pro: false,
       features: [
-        { key: "SAVED_SCANNER_RULES", label: "저장 조건검색식", limit: 3 },
-        { key: "ALERTS", label: "신호 알림 규칙", limit: 10 },
+        { key: "SAVED_SCANNER_RULES", label: "저장 조건검색식", limit: 3, used: scannerRules.length },
+        { key: "ALERTS", label: "신호 알림 규칙", limit: 10, used: mockAlerts.length },
       ],
     });
   }

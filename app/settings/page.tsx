@@ -525,7 +525,9 @@ function AlertCenter({
 // 구독(Track C, R52). 현재 티어와 기능/한도 표시. 결제 연동은 후속이라 업그레이드는 준비중.
 function SubscriptionCard() {
   const { data, isLoading } = useEntitlements();
-  const fmtLimit = (n: number) => (n < 0 ? "무제한" : `${n}개`);
+  const fmtUsage = (used: number, limit: number) =>
+    limit < 0 ? `${used} / 무제한` : `${used} / ${limit}개`;
+  const atLimit = (used: number, limit: number) => limit >= 0 && used >= limit;
   return (
     <Card>
       <CardContent className="space-y-3">
@@ -548,7 +550,14 @@ function SubscriptionCard() {
               {data.features.map((f) => (
                 <li key={f.key} className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{f.label}</span>
-                  <span className="font-medium tabular-nums">{fmtLimit(f.limit)}</span>
+                  <span
+                    className={cn(
+                      "font-medium tabular-nums",
+                      atLimit(f.used, f.limit) ? "text-amber-600" : "",
+                    )}
+                  >
+                    {fmtUsage(f.used, f.limit)}
+                  </span>
                 </li>
               ))}
             </ul>
