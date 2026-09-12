@@ -36,6 +36,7 @@ import type {
   NewsItem,
   NewsSource,
   Notification,
+  NotificationDigest,
   NotificationPrefs,
   PaperAccount,
   PaperOrder,
@@ -949,6 +950,21 @@ export function useNotifications(unreadOnly = false, enabled = true) {
         params: { unread_only: unreadOnly || undefined },
       });
       return resp.data;
+    },
+  });
+}
+
+// 알림 다이제스트(읽기 시점 요약). 자리를 비운 사이 온 알림을 분류별로 한눈에.
+export function useNotificationDigest(windowHours = 24, enabled = true) {
+  return useQuery({
+    queryKey: ["notifications", "digest", windowHours],
+    enabled,
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<NotificationDigest>>("/notifications/digest", {
+        params: { window: windowHours },
+      });
+      return resp.data.data;
     },
   });
 }

@@ -176,6 +176,23 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     errors.push({ route: routeRef.v, type: 'nav', text: String(e.message).slice(0, 200) });
   }
 
+  // Exercise the notification digest card + its live GET /notifications/digest.
+  routeRef.v = 'notification-digest';
+  try {
+    await page.goto(`${BASE}/settings`, { waitUntil: 'networkidle2', timeout: 30000 });
+    await sleep(2000);
+    const hasDigest = await page.evaluate(() => {
+      const t = document.body.innerText || '';
+      return t.includes('알림 요약') && t.includes('최근 24시간');
+    });
+    if (!hasDigest) {
+      errors.push({ route: routeRef.v, type: 'missing-digest', text: 'Notification digest card not found' });
+    }
+    await page.screenshot({ path: `${OUT}\\notification_digest.png`, fullPage: true }).catch(() => {});
+  } catch (e) {
+    errors.push({ route: routeRef.v, type: 'nav', text: String(e.message).slice(0, 200) });
+  }
+
   await browser.close();
   const summary = {};
   for (const e of errors) summary[e.route] = (summary[e.route] || 0) + 1;

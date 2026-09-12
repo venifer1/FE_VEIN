@@ -42,8 +42,67 @@ import {
   watchlist as mockWatchlist,
   BUILD_VERSION,
 } from "./mockData";
-import type { Market, MoverType, ScannerRule, Timeframe, TvlRow, User } from "./types";
+import type {
+  Market,
+  MoverType,
+  Notification,
+  NotificationDigest,
+  ScannerRule,
+  Timeframe,
+  TvlRow,
+  User,
+} from "./types";
 import { timeframesForMarket } from "./types";
+
+// 백엔드 NotificationDigest.summarize와 동일 계약을 목으로 재현한다(읽기 시점 요약).
+function buildNotificationDigest(all: Notification[], windowHours: number): NotificationDigest {
+  const since = Date.now() - windowHours * 3_600_000;
+  const rows = all
+    .filter((n) => new Date(n.created_at).getTime() >= since)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const isUnread = (n: Notification) => n.read_at == null && n.status !== "READ";
+  const category = (n: Notification) => {
+    if (n.signal_id != null) return "SIGNAL";
+    const t = n.title ?? "";
+    if (t.startsWith("Scanner match:")) return "SCANNER";
+    if (t.startsWith("Liquidation spike")) return "LIQUIDATION";
+    return "SYSTEM";
+  };
+  const order: Array<[string, string]> = [
+    ["SIGNAL", "패턴 신호"],
+    ["SCANNER", "조건검색"],
+    ["LIQUIDATION", "청산 급증"],
+    ["SYSTEM", "시스템"],
+  ];
+  const acc = new Map<string, { total: number; unread: number }>();
+  for (const n of rows) {
+    const key = category(n);
+    const c = acc.get(key) ?? { total: 0, unread: 0 };
+    c.total += 1;
+    if (isUnread(n)) c.unread += 1;
+    acc.set(key, c);
+  }
+  const categories = order
+    .filter(([key]) => (acc.get(key)?.total ?? 0) > 0)
+    .map(([key, label]) => ({ category: key, label, total: acc.get(key)!.total, unread: acc.get(key)!.unread }));
+  const total = rows.length;
+  const unread = rows.filter(isUnread).length;
+  const recent = rows.filter(isUnread).slice(0, 5);
+  const summary =
+    total === 0
+      ? `최근 ${windowHours}시간 새 알림이 없습니다.`
+      : `최근 ${windowHours}시간 알림 ${total}건 (안읽음 ${unread}건)` +
+        (categories.length ? " · " + categories.map((c) => `${c.label} ${c.total}`).join(" · ") : "");
+  return {
+    window_hours: windowHours,
+    generated_at: new Date().toISOString(),
+    total,
+    unread,
+    categories,
+    recent,
+    summary,
+  };
+}
 
 const trace = () => `mock-${Math.random().toString(36).slice(2, 10)}`;
 const explainFeedback = new Map<string, { helpful: boolean; reason?: string }>();
@@ -966,6 +1025,11 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     if (unreadOnly) list = list.filter((n) => n.read_at == null && n.status !== "READ");
     const unread = mockNotifications.filter((n) => n.read_at == null && n.status !== "READ").length;
     return ok(config, list, { next_cursor: null, unread_count: unread });
+  }
+  if (path === "/notifications/digest" && method === "get") {
+    const requested = Number(params.get("window") ?? 24);
+    const window = Math.max(1, Math.min(Number.isFinite(requested) ? requested : 24, 168));
+    return ok(config, buildNotificationDigest(mockNotifications, window));
   }
   const notifRead = path.match(/^\/notifications\/([^/]+)\/read$/);
   if (notifRead && method === "patch") {

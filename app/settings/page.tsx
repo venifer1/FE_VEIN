@@ -27,6 +27,7 @@ import {
   useDeleteWebPushSubscription,
   useNotificationPrefs,
   useUpdateNotificationPrefs,
+  useNotificationDigest,
 } from "@/lib/queries";
 import { useAuthStore } from "@/store/auth";
 import { formatRelative, formatTime } from "@/lib/format";
@@ -332,6 +333,54 @@ function HourSelect({ value, onChange, disabled }: { value: number; onChange: (h
   );
 }
 
+// 알림 다이제스트(읽기 시점 요약). R41 신호 큐레이션·R42 조용한 시간에 이어, 자리를 비운
+// 사이 온 알림을 분류별로 한 줄 요약한다. 저장 데이터를 바꾸지 않는 순수 조회.
+function NotificationDigestCard() {
+  const { data, isLoading, isError, refetch } = useNotificationDigest(24);
+  return (
+    <Card>
+      <CardContent className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">알림 요약</h2>
+            <p className="mt-1 text-xs text-muted-foreground">최근 24시간 알림을 분류별로 모아봅니다.</p>
+          </div>
+          {data && <Badge variant="secondary" className="tabular-nums">안읽음 {data.unread}</Badge>}
+        </div>
+        {isLoading ? (
+          <Skeleton className="h-14 w-full" />
+        ) : isError ? (
+          <ErrorState error={new Error("요약을 불러오지 못했습니다.")} onRetry={() => refetch()} />
+        ) : !data ? (
+          <EmptyState title="표시할 요약이 없습니다" />
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">{data.summary}</p>
+            {data.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {data.categories.map((c) => (
+                  <div
+                    key={c.category}
+                    className="flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs"
+                  >
+                    <span className="text-muted-foreground">{c.label}</span>
+                    <span className="font-semibold tabular-nums">{c.total}</span>
+                    {c.unread > 0 && (
+                      <span className="rounded bg-primary/10 px-1 text-[10px] font-medium text-primary tabular-nums">
+                        안읽음 {c.unread}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function AlertCenter({
   alerts,
   alertsQuery,
@@ -373,6 +422,8 @@ function AlertCenter({
       <WebNotificationSettings notifications={notifications} />
 
       <QuietHoursCard />
+
+      <NotificationDigestCard />
 
       <Card>
         <CardContent className="space-y-3">

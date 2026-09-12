@@ -981,6 +981,24 @@ export interface WebPushConfig {
   public_key?: string | null;
 }
 
+// ----- 알림 다이제스트 · 읽기 시점 요약 (GET /notifications/digest) -----
+export interface NotificationDigestCategory {
+  category: "SIGNAL" | "SCANNER" | "LIQUIDATION" | "SYSTEM" | string;
+  label: string;
+  total: number;
+  unread: number;
+}
+
+export interface NotificationDigest {
+  window_hours: number;
+  generated_at: string;
+  total: number;
+  unread: number;
+  categories: NotificationDigestCategory[];
+  recent: Notification[];
+  summary: string;
+}
+
 // ----- system -----
 // GET /system/status -> { build_version, time, providers:[{provider, freshness, last_run_at}] }.
 export interface ProviderStatus {
