@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   useSignalDetail,
   useSignalPerformance,
+  useSignalPerformanceSummary,
   useSignalExplain,
   useExplainFeedback,
   useSubmitExplainFeedback,
@@ -178,37 +179,85 @@ function HorizonStrip({ id }: { id: string }) {
   );
 }
 
-function PerformancePanel({ id }: { id: string }) {
+function PerformancePanel({ signal }: { signal: SignalDetail }) {
+  const id = signal.id;
   const { data, isLoading } = useSignalPerformance(id);
   const horizons = data?.horizons ?? [];
+
+  // 이 패턴 유형(type·market·timeframe)의 과거 실측 성과(base rate). 이 신호가 아직
+  // 신선해 자체 성과가 안 잡힐 때(=진입 판단이 가장 필요한 순간)의 판단 근거. (R86)
+  // 스캐너 성과 스트립과 같은 /performance/summary 데이터를 판단 지점에서 재사용.
+  const baseRate = useSignalPerformanceSummary({
+    type: signal.type,
+    market: signal.market,
+    timeframe: signal.timeframe,
+    horizon: "1d",
+  });
+  const brRow = (baseRate.data ?? [])
+    .filter((r) => (r.sample_size ?? 0) > 0)
+    .sort((a, b) => (b.sample_size ?? 0) - (a.sample_size ?? 0))[0];
+
   return (
     <Card>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
         <h2 className="text-sm font-semibold">성과</h2>
-        {isLoading ? (
-          <Skeleton className="h-16 w-full" />
-        ) : horizons.length === 0 ? (
-          <p className="rounded-md border border-dashed border-border py-4 text-center text-xs text-muted-foreground">
-            성과 측정 대기 중입니다. 탐지 후 시간이 더 지나야 계산됩니다.
-          </p>
-        ) : (
-          <ul className="divide-y divide-border text-sm">
-            {horizons.map((h) => (
-              <li key={h.horizon} className="flex items-center justify-between py-2">
-                <span className="font-mono text-muted-foreground">{h.horizon}</span>
-                <div className="text-right">
-                  <span className={cn("font-mono font-semibold tabular-nums", pctClass(h.return_pct))}>
-                    {formatPct(h.return_pct)}
-                  </span>
-                  <div className="mt-0.5 flex justify-end gap-2 text-[10px] text-muted-foreground tabular-nums">
-                    <span>MFE {formatPct(h.mfe_pct)}</span>
-                    <span>MAE {formatPct(h.mae_pct)}</span>
+
+        <div className="rounded-md border border-border bg-secondary/40 px-3 py-2">
+          <p className="text-[11px] font-medium text-muted-foreground">이 패턴 과거 성과 (참고)</p>
+          {baseRate.isLoading ? (
+            <Skeleton className="mt-1 h-4 w-44" />
+          ) : !brRow ? (
+            <p className="mt-1 text-xs text-muted-foreground">같은 유형의 과거 표본이 아직 없습니다.</p>
+          ) : (
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              <span className="text-muted-foreground">표본 {brRow.sample_size}</span>
+              <span aria-hidden>·</span>
+              <span>
+                1일 적중률 <span className="font-semibold tabular-nums">{brRow.hit_rate ?? "-"}%</span>
+              </span>
+              <span aria-hidden>·</span>
+              <span>
+                평균{" "}
+                <span className={cn("font-mono tabular-nums", pctClass(brRow.avg_return_pct))}>
+                  {formatPct(brRow.avg_return_pct)}
+                </span>
+              </span>
+              {(brRow.sample_size ?? 0) < 20 && (
+                <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-medium text-amber-600">
+                  표본 부족 · 참고만
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <p className="mb-1 text-[11px] font-medium text-muted-foreground">이 신호 성과</p>
+          {isLoading ? (
+            <Skeleton className="h-16 w-full" />
+          ) : horizons.length === 0 ? (
+            <p className="rounded-md border border-dashed border-border py-4 text-center text-xs text-muted-foreground">
+              성과 측정 대기 중입니다. 탐지 후 시간이 더 지나야 계산됩니다.
+            </p>
+          ) : (
+            <ul className="divide-y divide-border text-sm">
+              {horizons.map((h) => (
+                <li key={h.horizon} className="flex items-center justify-between py-2">
+                  <span className="font-mono text-muted-foreground">{h.horizon}</span>
+                  <div className="text-right">
+                    <span className={cn("font-mono font-semibold tabular-nums", pctClass(h.return_pct))}>
+                      {formatPct(h.return_pct)}
+                    </span>
+                    <div className="mt-0.5 flex justify-end gap-2 text-[10px] text-muted-foreground tabular-nums">
+                      <span>MFE {formatPct(h.mfe_pct)}</span>
+                      <span>MAE {formatPct(h.mae_pct)}</span>
+                    </div>
                   </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
@@ -577,7 +626,7 @@ function DetailInner() {
 
             <EvidenceList evidence={signal.evidence} />
             <ExplainPanel id={id} />
-            <PerformancePanel id={id} />
+            <PerformancePanel signal={signal} />
 
             <Card>
               <CardContent className="space-y-1">
