@@ -5,7 +5,7 @@ import { Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SignalCard } from "@/components/signal-card";
-import { useTopSignals } from "@/lib/queries";
+import { useTopSignals, useSignalPerformanceSummary } from "@/lib/queries";
 import type { Market } from "@/lib/types";
 
 // 오늘의 주목 신호(R41, 신호 과다 완화). 활성 신호를 Pattern Score 순으로 상위만 홈에 올려,
@@ -22,6 +22,12 @@ export function TopSignalsSection() {
   const [tab, setTab] = useState<Market | "ALL">("ALL");
   const market = tab === "ALL" ? undefined : tab;
   const { data, isLoading, isError } = useTopSignals(market, 6);
+  // 카드 triage용 과거 적중률(R89): 전체 요약(1d)을 한 번만 조회해 type|market|timeframe로
+  // 매칭. 카드마다 재요청하지 않도록 섹션에서 1회 조회 후 맵으로 넘긴다.
+  const { data: perfRows } = useSignalPerformanceSummary({ horizon: "1d" });
+  const perfByKey = new Map(
+    (perfRows ?? []).map((r) => [`${r.type}|${r.market}|${r.timeframe}`, r]),
+  );
 
   return (
     <Card>
@@ -54,9 +60,16 @@ export function TopSignalsSection() {
           <p className="py-2 text-center text-xs text-muted-foreground">표시할 활성 신호가 없습니다.</p>
         ) : (
           <div className="space-y-2">
-            {data.map((s) => (
-              <SignalCard key={s.id} signal={s} />
-            ))}
+            {data.map((s) => {
+              const row = perfByKey.get(`${s.type}|${s.market}|${s.timeframe}`);
+              return (
+                <SignalCard
+                  key={s.id}
+                  signal={s}
+                  perfHint={row ? { hitRate: row.hit_rate, sampleSize: row.sample_size } : undefined}
+                />
+              );
+            })}
           </div>
         )}
       </CardContent>

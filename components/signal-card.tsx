@@ -10,7 +10,15 @@ import { formatPrice, formatRelative, formatScore } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useWatchlist, useAddWatchItem, useRemoveWatchItem } from "@/lib/queries";
 
-export function SignalCard({ signal }: { signal: Signal }) {
+// 과거 적중률 힌트(R89). 홈 주목신호처럼 triage가 중요한 큐레이션 면에서만 opt-in으로 넘긴다.
+// 표본이 충분(>=MIN_SAMPLE)할 때만 렌더 — 표본 부족 적중률은 노이즈라 숨긴다.
+export interface SignalCardPerfHint {
+  hitRate?: string | null;
+  sampleSize?: number | null;
+}
+const PERF_HINT_MIN_SAMPLE = 10;
+
+export function SignalCard({ signal, perfHint }: { signal: Signal; perfHint?: SignalCardPerfHint }) {
   // 카드에서 바로 관심 등록/해제(R83). 상세를 열지 않고 후보를 담는 마찰을 줄인다.
   // 카드가 <Link>라 별 클릭이 네비게이션을 타지 않도록 prevent/stopPropagation 한다.
   const navId = instrumentPathId(signal.instrument?.id);
@@ -38,6 +46,12 @@ export function SignalCard({ signal }: { signal: Signal }) {
     showCTarget && Number.isFinite(cur) && cur !== 0
       ? ((Number(signal.c_target) - cur) / cur) * 100
       : null;
+  // 과거 적중률: 표본이 충분할 때만(노이즈 방지). 라벨 "적중 X% (n)". (R89)
+  const showHit =
+    perfHint != null &&
+    perfHint.hitRate != null &&
+    perfHint.hitRate !== "" &&
+    (perfHint.sampleSize ?? 0) >= PERF_HINT_MIN_SAMPLE;
   return (
     <Link href={`/signals/${signalPathId(signal.id)}`} className="block">
       <Card className="transition-colors hover:bg-accent/40">
@@ -73,6 +87,14 @@ export function SignalCard({ signal }: { signal: Signal }) {
             </div>
             <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
               <span>{formatRelative(signal.detected_at)}</span>
+              {showHit && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="rounded bg-secondary px-1.5 py-0.5 text-foreground">
+                    과거 적중 {perfHint!.hitRate}% <span className="text-muted-foreground">(n{perfHint!.sampleSize})</span>
+                  </span>
+                </>
+              )}
             </div>
           </div>
           <button
