@@ -506,6 +506,25 @@ function DetailInner() {
                     )}
                 </div>
                 <p className="text-xs text-muted-foreground">탐지 {formatTime(signal.detected_at)}</p>
+                {(() => {
+                  // 유효기간: setup이 언제까지 유효한지(만료까지 D-day). 활성 신호에만 의미가 있다. (R85)
+                  const active = signal.status === "DETECTED" || signal.status === "NEAR_COMPLETION";
+                  if (!active || !signal.expires_at) return null;
+                  const ms = new Date(signal.expires_at).getTime() - Date.now();
+                  if (!Number.isFinite(ms)) return null;
+                  if (ms <= 0) {
+                    return <p className="text-xs text-destructive">유효기간 만료됨 · 갱신 대기</p>;
+                  }
+                  const days = Math.ceil(ms / 86_400_000);
+                  return (
+                    <p className="text-xs text-muted-foreground">
+                      유효기간 {formatTime(signal.expires_at)}{" "}
+                      <span className={cn("font-medium", days <= 1 && "text-[hsl(var(--warning))]")}>
+                        (D-{days})
+                      </span>
+                    </p>
+                  );
+                })()}
               </CardContent>
             </Card>
 

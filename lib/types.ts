@@ -342,6 +342,7 @@ export interface ChartRange {
 }
 
 export interface SignalDetail extends Signal {
+  expires_at?: string | null;
   evidence: Evidence[];
   invalidation?: Invalidation | null;
   chart_range?: ChartRange | null;

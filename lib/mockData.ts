@@ -337,6 +337,8 @@ export function getSignalDetail(id: string): SignalDetail | null {
   };
   return {
     ...s,
+    // 유효기간(R85): 탐지시각 + 30일. detected_at 기반이라 결정적(SSR/CSR 일치).
+    expires_at: new Date(new Date(s.detected_at).getTime() + 30 * 86_400_000).toISOString(),
     evidence: ev.evidence,
     invalidation: ev.invalidation,
     chart_range: { from: c[Math.max(0, c.length - 60)].open_time, to: c[c.length - 1].open_time },
