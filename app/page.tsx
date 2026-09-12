@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Check, Circle, X } from "lucide-react";
 import { RequireAuth } from "@/components/require-auth";
 import { RegimeBanner } from "@/components/regime-banner";
 import { EconomicCalendar } from "@/components/economic-calendar";
@@ -14,7 +14,7 @@ import { EmptyState, ErrorState, StaleNotice, ComplianceFooter, PartialErrorNoti
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useMarketIndices, useKimchiPremium, useWatchlist, useFearGreedHistory, useIndexHistory, useMovers, useTrending, useGlobalMarket } from "@/lib/queries";
+import { useMarketIndices, useKimchiPremium, useWatchlist, useFearGreedHistory, useIndexHistory, useMovers, useTrending, useGlobalMarket, useOnboarding, useDismissOnboarding } from "@/lib/queries";
 import { formatPrice } from "@/lib/format";
 import { indicesByKey, instrumentPathId } from "@/lib/types";
 import type { Freshness, Market, MoverType, WatchlistItem } from "@/lib/types";
@@ -516,10 +516,63 @@ function WatchlistMini() {
   );
 }
 
+// 온보딩 "시작하기"(R48). 신규 사용자가 핵심 기능(관심종목·알림·모의투자·조건검색)에
+// 도달하도록 안내한다. 모든 스텝 완료 또는 닫으면 사라진다. 완료 여부는 실제 상태에서 파생.
+function OnboardingCard() {
+  const { data, isLoading } = useOnboarding();
+  const dismiss = useDismissOnboarding();
+  if (isLoading || !data || data.dismissed || data.all_done) return null;
+
+  return (
+    <Card>
+      <CardContent className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">시작하기</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              VEIN 핵심 기능을 둘러보세요 · {data.completed}/{data.total} 완료
+            </p>
+          </div>
+          <button
+            onClick={() => dismiss.mutate()}
+            disabled={dismiss.isPending}
+            aria-label="시작하기 닫기"
+            className="rounded-md p-1 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <ul className="space-y-1.5">
+          {data.steps.map((step) =>
+            step.done ? (
+              <li key={step.key} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Check className="h-4 w-4 shrink-0 text-emerald-500" />
+                <span className="line-through">{step.label}</span>
+              </li>
+            ) : (
+              <li key={step.key}>
+                <Link
+                  href={step.href}
+                  className="flex items-center gap-2 text-sm hover:text-primary"
+                >
+                  <Circle className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span>{step.label}</span>
+                  <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                </Link>
+              </li>
+            ),
+          )}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
 function HomeInner() {
   return (
     <div className="space-y-4 p-4">
       <h1 className="text-lg font-semibold">터미널</h1>
+      <OnboardingCard />
       <RegimeBanner />
       <EconomicCalendar />
       <TopSignalsSection />

@@ -981,6 +981,22 @@ export interface WebPushConfig {
   public_key?: string | null;
 }
 
+// ----- 온보딩 "시작하기" 체크리스트 (GET /me/onboarding) -----
+export interface OnboardingStep {
+  key: string;
+  label: string;
+  done: boolean;
+  href: string;
+}
+
+export interface OnboardingStatus {
+  steps: OnboardingStep[];
+  completed: number;
+  total: number;
+  all_done: boolean;
+  dismissed: boolean;
+}
+
 // ----- 알림 다이제스트 · 읽기 시점 요약 (GET /notifications/digest) -----
 export interface NotificationDigestCategory {
   category: "SIGNAL" | "SCANNER" | "LIQUIDATION" | "SYSTEM" | string;

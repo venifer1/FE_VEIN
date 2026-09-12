@@ -38,6 +38,7 @@ import type {
   Notification,
   NotificationDigest,
   NotificationPrefs,
+  OnboardingStatus,
   PaperAccount,
   PaperOrder,
   PaperPerformance,
@@ -951,6 +952,30 @@ export function useNotifications(unreadOnly = false, enabled = true) {
       });
       return resp.data;
     },
+  });
+}
+
+// 온보딩 "시작하기" 체크리스트. 신규 사용자가 핵심 기능에 도달하도록 홈에서 안내.
+export function useOnboarding(enabled = true) {
+  return useQuery({
+    queryKey: ["onboarding"],
+    enabled,
+    staleTime: 30_000,
+    queryFn: async () => {
+      const resp = await api.get<Envelope<OnboardingStatus>>("/me/onboarding");
+      return resp.data.data;
+    },
+  });
+}
+
+export function useDismissOnboarding() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const resp = await api.post<Envelope<OnboardingStatus>>("/me/onboarding/dismiss");
+      return resp.data.data;
+    },
+    onSuccess: (data) => qc.setQueryData(["onboarding"], data),
   });
 }
 

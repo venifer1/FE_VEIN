@@ -176,6 +176,20 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
     errors.push({ route: routeRef.v, type: 'nav', text: String(e.message).slice(0, 200) });
   }
 
+  // Onboarding "시작하기" checklist on home (new user has undone steps → card shows).
+  routeRef.v = 'onboarding';
+  try {
+    await page.goto(`${BASE}/`, { waitUntil: 'networkidle2', timeout: 30000 });
+    await sleep(2000);
+    const hasOnboarding = await page.evaluate(() => (document.body.innerText || '').includes('시작하기'));
+    if (!hasOnboarding) {
+      errors.push({ route: routeRef.v, type: 'missing-onboarding', text: 'Onboarding card not found on home' });
+    }
+    await page.screenshot({ path: `${OUT}\\onboarding.png`, fullPage: true }).catch(() => {});
+  } catch (e) {
+    errors.push({ route: routeRef.v, type: 'nav', text: String(e.message).slice(0, 200) });
+  }
+
   // Exercise the notification digest card + its live GET /notifications/digest.
   routeRef.v = 'notification-digest';
   try {

@@ -54,6 +54,25 @@ import type {
 } from "./types";
 import { timeframesForMarket } from "./types";
 
+// 온보딩(R48): 목 상태에서 스텝 완료를 파생. dismiss는 모듈 플래그로 유지.
+let mockOnboardingDismissed = false;
+function buildOnboarding() {
+  const steps = [
+    { key: "WATCHLIST", label: "관심종목 추가", done: mockWatchlist.items.length > 0, href: "/" },
+    { key: "ALERT", label: "신호 알림 만들기", done: mockAlerts.length > 0, href: "/scanner" },
+    { key: "PAPER", label: "모의투자 시작", done: Boolean(mockPaperAccount), href: "/paper" },
+    { key: "SCANNER", label: "조건검색식 저장", done: scannerRules.length > 0, href: "/scanner" },
+  ];
+  const completed = steps.filter((s) => s.done).length;
+  return {
+    steps,
+    completed,
+    total: steps.length,
+    all_done: completed === steps.length,
+    dismissed: mockOnboardingDismissed,
+  };
+}
+
 // 백엔드 NotificationDigest.summarize와 동일 계약을 목으로 재현한다(읽기 시점 요약).
 function buildNotificationDigest(all: Notification[], windowHours: number): NotificationDigest {
   const since = Date.now() - windowHours * 3_600_000;
@@ -322,6 +341,13 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       quiet_end_hour: Number(b.quiet_end_hour ?? 8),
     };
     return ok(config, mockNotificationPrefs);
+  }
+  if (path === "/me/onboarding" && method === "get") {
+    return ok(config, buildOnboarding());
+  }
+  if (path === "/me/onboarding/dismiss" && method === "post") {
+    mockOnboardingDismissed = true;
+    return ok(config, buildOnboarding());
   }
 
   // ----- market terminal -----
