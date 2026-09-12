@@ -52,8 +52,11 @@ function SignalActionPanel({
   const paperOrder = useCreatePaperOrder();
   const blocked = explain.data?.risk_guard === "BLOCK";
   const busy = paperOrder.isPending;
+  // 주식(미국·코스피·코스닥)은 현물이라 레버리지·공매도(선물 숏)가 성립하지 않는다 → SPOT 매수만.
+  // 코인만 무기한선물(perp)이 있어 롱/숏+레버리지를 제공한다. (R84)
+  const isCrypto = signal.market === "CRYPTO";
 
-  const createPaper = (positionSide: "LONG" | "SHORT") => {
+  const createFutures = (positionSide: "LONG" | "SHORT") => {
     paperOrder.mutate({
       instrument_id: instrumentNavId,
       side: positionSide === "LONG" ? "BUY" : "SELL",
@@ -63,6 +66,18 @@ function SignalActionPanel({
       investment_type: "FUTURES",
       position_side: positionSide,
       leverage,
+      timeframe: signal.timeframe,
+    });
+  };
+
+  const createSpotBuy = () => {
+    paperOrder.mutate({
+      instrument_id: instrumentNavId,
+      side: "BUY",
+      type: "MARKET",
+      quantity,
+      price: signal.current_price || undefined,
+      investment_type: "SPOT",
       timeframe: signal.timeframe,
     });
   };
@@ -77,20 +92,32 @@ function SignalActionPanel({
           </div>
           {blocked && <Badge variant="destructive">Risk Guard BLOCK</Badge>}
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className={cn("grid gap-2", isCrypto ? "grid-cols-2" : "grid-cols-1")}>
           <Input inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="수량" />
-          <Input inputMode="decimal" value={leverage} onChange={(e) => setLeverage(e.target.value)} placeholder="레버리지" />
+          {isCrypto && (
+            <Input inputMode="decimal" value={leverage} onChange={(e) => setLeverage(e.target.value)} placeholder="레버리지" />
+          )}
         </div>
-        <div className="grid grid-cols-2 gap-2">
-          <Button disabled={blocked || busy} onClick={() => createPaper("LONG")}>
-            <WalletCards className="h-4 w-4" />
-            Paper Long
-          </Button>
-          <Button variant="destructive" disabled={blocked || busy} onClick={() => createPaper("SHORT")}>
-            <WalletCards className="h-4 w-4" />
-            Paper Short
-          </Button>
-        </div>
+        {isCrypto ? (
+          <div className="grid grid-cols-2 gap-2">
+            <Button disabled={blocked || busy} onClick={() => createFutures("LONG")}>
+              <WalletCards className="h-4 w-4" />
+              Paper Long
+            </Button>
+            <Button variant="destructive" disabled={blocked || busy} onClick={() => createFutures("SHORT")}>
+              <WalletCards className="h-4 w-4" />
+              Paper Short
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <Button className="w-full" disabled={blocked || busy} onClick={createSpotBuy}>
+              <WalletCards className="h-4 w-4" />
+              모의 매수 (현물)
+            </Button>
+            <p className="text-[11px] text-muted-foreground">주식은 현물 매수만 지원합니다(레버리지·공매도 없음).</p>
+          </div>
+        )}
         {paperOrder.isError && (
           <p className="text-xs text-destructive">
             모의 주문에 실패했습니다. 모의 계정이 없으면 `/paper`에서 먼저 계정을 생성하세요.
