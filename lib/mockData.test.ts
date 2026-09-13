@@ -1,5 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { getSignalPerformanceSummary } from "./mockData";
+import { getSignalPerformanceSummary, classifyFg } from "./mockData";
+
+// 공포·탐욕 지수(Fear & Greed) 라벨 분류 경계값 회귀 보호(R145). 데모 F&G 히스토리 칩 색·문구.
+describe("classifyFg", () => {
+  it("maps values to labels at each boundary", () => {
+    expect(classifyFg(0)).toBe("Extreme Fear");
+    expect(classifyFg(24)).toBe("Extreme Fear");
+    expect(classifyFg(25)).toBe("Fear");
+    expect(classifyFg(44)).toBe("Fear");
+    expect(classifyFg(45)).toBe("Neutral");
+    expect(classifyFg(55)).toBe("Neutral");
+    expect(classifyFg(56)).toBe("Greed");
+    expect(classifyFg(74)).toBe("Greed");
+    expect(classifyFg(75)).toBe("Extreme Greed");
+    expect(classifyFg(100)).toBe("Extreme Greed");
+  });
+});
 
 // 오프라인 데모(mock) 성과 요약 필터 회귀 보호(R128). 실서버 /signals/performance/summary와
 // 같은 형태를 mockAdapter가 이 함수로 흉내낸다.

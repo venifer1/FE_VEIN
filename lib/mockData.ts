@@ -444,7 +444,7 @@ export const marketIndices: MarketIndexRow[] = [
 ];
 
 // Fear & Greed 30d history (ascending). Deterministic so SSR/CSR match.
-function classifyFg(v: number): string {
+export function classifyFg(v: number): string {
   if (v <= 24) return "Extreme Fear";
   if (v <= 44) return "Fear";
   if (v <= 55) return "Neutral";
