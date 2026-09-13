@@ -33,8 +33,8 @@ const INDICATORS = [
   ["RSI", "RSI(14)"],
   ["VOLUME_RATIO", "거래량/20평균"],
   ["PRICE", "현재가"],
-  ["MA5", "MA5"],
-  ["MACD_HISTOGRAM", "MACD Histogram"],
+  ["MA5", "이동평균5(MA5)"],
+  ["MACD_HISTOGRAM", "MACD 히스토그램"],
 ] as const;
 const OPERATORS = ["<", "<=", ">", ">="] as const;
 const MARKETS: Market[] = ["CRYPTO", "US", "KOSPI", "KOSDAQ"];
