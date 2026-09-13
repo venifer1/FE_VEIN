@@ -8,6 +8,7 @@ import {
   runBacktest,
   getStrategyHistory,
   strategies,
+  getThemeConstituents,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -133,6 +134,27 @@ describe("getStrategyHistory", () => {
 
   it("returns empty for an unknown strategy id", () => {
     expect(getStrategyHistory("nope_999")).toEqual([]);
+  });
+});
+
+describe("getThemeConstituents", () => {
+  it("returns theme detail with its constituents", () => {
+    const d = getThemeConstituents("301");
+    expect(d).not.toBeNull();
+    expect(d!.theme_id).toBe(301);
+    expect(d!.name).toBe("AI / 반도체");
+    expect(d!.items).toHaveLength(2);
+    expect(d!.items[0].instrument_ref).toBe("NVDA");
+  });
+
+  it("returns an empty item list for a theme with no mapped constituents", () => {
+    const d = getThemeConstituents("305"); // 미분류: 항목 없음
+    expect(d).not.toBeNull();
+    expect(d!.items).toEqual([]);
+  });
+
+  it("returns null for an unknown theme id", () => {
+    expect(getThemeConstituents("999")).toBeNull();
   });
 });
 
