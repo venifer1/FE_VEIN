@@ -509,7 +509,12 @@ function WatchlistMini() {
   return (
     <Card>
       <CardContent className="space-y-2">
-        <h2 className="text-sm font-semibold">관심종목</h2>
+        <h2 className="text-sm font-semibold">
+          관심종목
+          {items.length > 0 && (
+            <span className="ml-1 font-normal text-muted-foreground">({items.length})</span>
+          )}
+        </h2>
         {isLoading ? (
           <Skeleton className="h-20 w-full" />
         ) : items.length === 0 ? (
