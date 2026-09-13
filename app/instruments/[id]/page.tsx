@@ -258,19 +258,19 @@ function InstrumentInner() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-md border border-border px-2 py-1.5">
-                    <p className="text-[10px] text-muted-foreground">펀딩비</p>
+                    <p className="text-[10px] text-muted-foreground">펀딩비(보유료)</p>
                     <p className={cn("font-semibold tabular-nums", !hasFr ? "" : fr >= 0 ? "text-[hsl(var(--success))]" : "text-destructive")}>
                       {hasFr ? `${fr >= 0 ? "+" : ""}${(fr * 100).toFixed(4)}%` : "-"}
                     </p>
                   </div>
                   <div className="rounded-md border border-border px-2 py-1.5">
-                    <p className="text-[10px] text-muted-foreground">미결제약정</p>
+                    <p className="text-[10px] text-muted-foreground">미결제약정(OI)</p>
                     <p className="font-semibold tabular-nums">{compactUsd(deriv.oi_value_usd)}</p>
                   </div>
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                    <span>롱/숏 {hasLsr ? lsr.toFixed(2) : "-"}</span>
+                    <span>롱·숏 비율 {hasLsr ? lsr.toFixed(2) : "-"}</span>
                     <span className="tabular-nums">{hasLsr ? `${longPct.toFixed(0)}% 롱` : ""}</span>
                   </div>
                   <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-destructive/40">
