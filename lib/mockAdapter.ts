@@ -591,7 +591,10 @@ export const mockAdapter: AxiosAdapter = async (config) => {
     const limit = Number(params.get("limit") ?? 10);
     let list = mockSignals.filter((s) => s.status === "DETECTED" || s.status === "NEAR_COMPLETION");
     if (market) list = list.filter((s) => s.market === market);
-    list = [...list].sort((a, b) => Number(b.score ?? 0) - Number(a.score ?? 0)).slice(0, limit);
+    // 백엔드 R90과 동일하게 종합 Pattern Score(coalesce(pattern_score, score))로 정렬.
+    const sortScore = (s: { pattern_score?: string | null; score?: string | null }) =>
+      Number(s.pattern_score ?? s.score ?? 0);
+    list = [...list].sort((a, b) => sortScore(b) - sortScore(a)).slice(0, limit);
     return ok(config, list, { freshness: "FRESH" });
   }
   // performance summary (aggregate) — must precede the /signals/{id} matcher.
