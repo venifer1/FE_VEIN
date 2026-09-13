@@ -143,6 +143,25 @@ function SignalActionPanel({
   );
 }
 
+// 헤더 점수: 종합 Pattern Score(있으면)를 앞에, 구조 점수를 뒤에. 카드의 "종합 {점수}"와
+// 일관되게 상세 상단에서도 종합 점수를 바로 보여준다(R102). explain 쿼리는 아래 패널들과
+// 공유(React Query dedup)라 추가 요청 없음. 종합 미계산 시 구조 점수만.
+function HeaderScore({ id, score }: { id: string; score?: string | null }) {
+  const { data } = useSignalExplain(id);
+  const composite = data?.pattern_score;
+  return (
+    <span className="text-xs text-muted-foreground">
+      {composite != null && (
+        <>
+          종합 <span className="font-medium text-foreground">{composite}</span>
+          {" · "}
+        </>
+      )}
+      구조 {formatScore(score)}
+    </span>
+  );
+}
+
 function HorizonStrip({ id }: { id: string }) {
   const { data, isLoading } = useSignalPerformance(id);
   const horizons = data?.horizons ?? [];
@@ -546,7 +565,7 @@ function DetailInner() {
                   <TypeBadge type={signal.type} subtype={signal.subtype} />
                   <StatusBadge status={signal.status} />
                   <span className="rounded bg-secondary px-2 py-0.5 text-xs">{signal.timeframe}</span>
-                  <span className="text-xs text-muted-foreground">구조 점수 {formatScore(signal.score)}</span>
+                  <HeaderScore id={id} score={signal.score} />
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                   <span>현재가 {formatPrice(signal.current_price)}</span>
