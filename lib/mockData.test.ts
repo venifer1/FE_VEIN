@@ -6,6 +6,8 @@ import {
   getMovers,
   getFearGreedHistory,
   runBacktest,
+  getStrategyHistory,
+  strategies,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -105,6 +107,32 @@ describe("runBacktest", () => {
     expect(runBacktest({ ...input, walk_forward: true, is_ratio: 0.99 }).walk_forward?.is_ratio).toBe(
       "0.90",
     );
+  });
+});
+
+describe("getStrategyHistory", () => {
+  const id = String(strategies[0].id); // 시드 전략(런 히스토리 존재)
+
+  it("returns seeded runs newest-first by run_at", () => {
+    const h = getStrategyHistory(id);
+    expect(h.length).toBeGreaterThanOrEqual(2);
+    // run_at 내림차순
+    const times = h.map((r) => new Date(r.run_at).getTime());
+    expect([...times].sort((a, b) => b - a)).toEqual(times);
+    // 시드 최신은 total_return_pct 38.7, 가장 오래된 것은 21.4
+    expect(h[0].total_return_pct).toBe("38.7");
+    expect(h[h.length - 1].total_return_pct).toBe("21.4");
+  });
+
+  it("caps to the requested limit (keeping newest)", () => {
+    const full = getStrategyHistory(id);
+    const two = getStrategyHistory(id, 2);
+    expect(two).toHaveLength(2);
+    expect(two).toEqual(full.slice(0, 2));
+  });
+
+  it("returns empty for an unknown strategy id", () => {
+    expect(getStrategyHistory("nope_999")).toEqual([]);
   });
 });
 
