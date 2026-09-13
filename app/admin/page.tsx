@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorState } from "@/components/states";
+import { STATUS_LABEL as SIGNAL_STATUS_LABEL } from "@/components/badges";
 import {
   useAdminApproveUser,
   useAdminSetTier,
@@ -60,7 +61,15 @@ function StatCard({
   );
 }
 
-function Distribution({ title, rows }: { title: string; rows: Record<string, number> }) {
+function Distribution({
+  title,
+  rows,
+  labels,
+}: {
+  title: string;
+  rows: Record<string, number>;
+  labels?: Record<string, string>;
+}) {
   const entries = Object.entries(rows ?? {});
   const total = entries.reduce((sum, [, v]) => sum + v, 0);
   return (
@@ -75,7 +84,7 @@ function Distribution({ title, rows }: { title: string; rows: Record<string, num
             return (
               <div key={key} className="space-y-1">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">{key}</span>
+                  <span className="font-medium">{labels?.[key] ?? key}</span>
                   <span className="tabular-nums text-muted-foreground">{fmt(value)}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-secondary">
@@ -363,9 +372,9 @@ function AdminInner() {
               </CardContent>
             </Card>
 
-            <Distribution title="사용자 상태" rows={data.users.by_status} />
+            <Distribution title="사용자 상태" rows={data.users.by_status} labels={USER_STATUS_LABEL} />
             {data.users.by_tier && <Distribution title="구독 티어" rows={data.users.by_tier} />}
-            <Distribution title="신호 상태" rows={data.signals.by_status} />
+            <Distribution title="신호 상태" rows={data.signals.by_status} labels={SIGNAL_STATUS_LABEL} />
           </>
         ) : null}
 

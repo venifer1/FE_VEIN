@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Freshness, Market, NewsSentiment, SignalStatus, SignalType } from "@/lib/types";
 import { formatRelative } from "@/lib/format";
 
-const STATUS_LABEL: Record<SignalStatus, string> = {
+export const STATUS_LABEL: Record<SignalStatus, string> = {
   DETECTED: "탐지",
   NEAR_COMPLETION: "완성 임박",
   INVALIDATED: "실패",
