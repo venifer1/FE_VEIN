@@ -11,6 +11,8 @@ import {
   getThemeConstituents,
   getTvlHistory,
   tvlProtocols,
+  getDerivativeDetail,
+  derivatives,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -179,6 +181,30 @@ describe("getTvlHistory", () => {
   it("is deterministic (seeded) for the same id", () => {
     const a = getTvlHistory(id)!.points.map((p) => p.tvl);
     const b = getTvlHistory(id)!.points.map((p) => p.tvl);
+    expect(a).toEqual(b);
+  });
+});
+
+describe("getDerivativeDetail", () => {
+  const sym = derivatives[0].symbol; // e.g. "BTC"
+
+  it("returns null for an unknown symbol", () => {
+    expect(getDerivativeDetail("NOPE")).toBeNull();
+  });
+
+  it("returns 48-point long/short + OI histories, case-insensitive", () => {
+    const d = getDerivativeDetail(sym.toLowerCase());
+    expect(d).not.toBeNull();
+    expect(d!.symbol).toBe(sym);
+    expect(d!.long_short_history).toHaveLength(48);
+    expect(d!.oi_history).toHaveLength(48);
+    // 롱숏비는 0.4 하한
+    expect(d!.long_short_history.every((p) => Number(p.ratio) >= 0.4)).toBe(true);
+  });
+
+  it("is deterministic (seeded) for the same symbol", () => {
+    const a = getDerivativeDetail(sym)!.long_short_history.map((p) => p.ratio);
+    const b = getDerivativeDetail(sym)!.long_short_history.map((p) => p.ratio);
     expect(a).toEqual(b);
   });
 });
