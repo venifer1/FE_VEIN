@@ -360,6 +360,15 @@ function PositionList({ positions }: { positions: PaperPosition[] }) {
   );
 }
 
+// 주문 방향을 한글로: 선물=롱/숏(+청산), 현물=매수/매도. (R100 용어 후속)
+function orderSideLabel(o: PaperOrder): string {
+  if (o.investment_type === "FUTURES") {
+    const side = o.position_side === "LONG" ? "롱" : o.position_side === "SHORT" ? "숏" : (o.position_side ?? "");
+    return `${side}${o.reduce_only ? " 청산" : ""}`;
+  }
+  return o.side === "BUY" ? "매수" : o.side === "SELL" ? "매도" : o.side;
+}
+
 function OrderList({ orders }: { orders: PaperOrder[] }) {
   if (orders.length === 0) {
     return <EmptyState title="주문 내역이 없습니다" />;
@@ -371,8 +380,7 @@ function OrderList({ orders }: { orders: PaperOrder[] }) {
         <div key={o.id} className="rounded-md border border-border px-3 py-2 text-sm">
           <div className="flex items-center justify-between gap-3">
             <span className="min-w-0 truncate font-medium">
-              {o.investment_type === "FUTURES" ? `${o.position_side}${o.reduce_only ? " 청산" : ""}` : o.side}{" "}
-              {o.symbol ?? `#${o.instrument_id}`}
+              {orderSideLabel(o)} {o.symbol ?? `#${o.instrument_id}`}
             </span>
             <span className="shrink-0 text-xs text-muted-foreground">{o.status}</span>
           </div>
