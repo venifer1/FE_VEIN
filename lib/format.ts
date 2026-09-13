@@ -63,6 +63,15 @@ export function compactUsdScaled(v?: string | null): string {
   return `${neg}$${a.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 }
 
+// ko-KR 로케일 숫자 포맷(지수·지표 표시용). null/빈값→"-", 비수치는 원본 문자열 유지.
+// (R131: 홈 로컬 정의를 lib로 추출.)
+export function fmtNum(v?: string | null, frac = 2): string {
+  if (v == null || v === "") return "-";
+  const n = Number(v);
+  if (Number.isNaN(n)) return v;
+  return n.toLocaleString("ko-KR", { maximumFractionDigits: frac });
+}
+
 export function formatScore(value?: string | null): string {
   if (value == null || value === "") return "-";
   try {

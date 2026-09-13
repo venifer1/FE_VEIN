@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMarketIndices, useKimchiPremium, useWatchlist, useFearGreedHistory, useIndexHistory, useMovers, useTrending, useGlobalMarket, useOnboarding, useDismissOnboarding } from "@/lib/queries";
-import { formatPrice, compactUsdScaled } from "@/lib/format";
+import { formatPrice, compactUsdScaled, fmtNum } from "@/lib/format";
 import { indicesByKey, instrumentPathId } from "@/lib/types";
 import type { Freshness, Market, MoverType, WatchlistItem } from "@/lib/types";
 import { useLivePrice, useLiveConnected } from "@/store/livePrices";
@@ -42,12 +42,6 @@ function fgColor(v?: number): string {
 }
 
 
-function fmtNum(v?: string | null, frac = 2): string {
-  if (v == null || v === "") return "-";
-  const n = Number(v);
-  if (Number.isNaN(n)) return v;
-  return n.toLocaleString("ko-KR", { maximumFractionDigits: frac });
-}
 
 function FearGreedMetric({ value, classification }: { value?: string | null; classification?: string | null }) {
   const { data } = useFearGreedHistory(30);

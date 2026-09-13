@@ -10,6 +10,7 @@ import {
   toChartTime,
   koreanMoney,
   compactUsdScaled,
+  fmtNum,
 } from "./format";
 
 // FE 순수 표시 헬퍼 회귀 보호(R122). 값은 문자열 소수로 들어와 표시 시점에만 포맷된다.
@@ -72,6 +73,19 @@ describe("compactUsd", () => {
     expect(compactUsd("-1500000000")).toBe("$-1.50B");
     expect(compactUsd(null)).toBe("-");
     expect(compactUsd("x")).toBe("-");
+  });
+});
+
+describe("fmtNum", () => {
+  it("formats with ko-KR grouping and fraction cap", () => {
+    expect(fmtNum("1234.567")).toBe("1,234.57");
+    expect(fmtNum("1234.567", 0)).toBe("1,235");
+    expect(fmtNum("18000")).toBe("18,000");
+  });
+  it("null/blank -> dash, non-numeric -> passthrough", () => {
+    expect(fmtNum(null)).toBe("-");
+    expect(fmtNum("")).toBe("-");
+    expect(fmtNum("abc")).toBe("abc");
   });
 });
 
