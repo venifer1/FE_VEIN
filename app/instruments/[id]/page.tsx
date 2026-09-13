@@ -79,7 +79,14 @@ function InstrumentInner() {
   const indicatorsQuery = useInstrumentIndicators(id, tf, showInd);
 
   const signalsQuery = useSignals({ instrument_id: id });
-  const recentSignals = signalsQuery.data?.pages.flatMap((p) => p.data) ?? [];
+  // 활성(탐지/완성임박) 신호를 위로, 그다음 실패·만료를 최신순으로. 종목 페이지에서 아직
+  // 유효한 액션 후보가 실패/만료 신호에 묻히지 않게 한다(R97). 원본은 최신순이라 안정 정렬.
+  const recentSignals = (() => {
+    const all = signalsQuery.data?.pages.flatMap((p) => p.data) ?? [];
+    const isActive = (s: { status: string }) =>
+      s.status === "DETECTED" || s.status === "NEAR_COMPLETION";
+    return [...all].sort((a, b) => Number(isActive(b)) - Number(isActive(a)));
+  })();
 
   // Derivatives mini-panel: CRYPTO only. base = symbol without "KRW-" (KRW-BTC→BTC).
   // No perp (404/empty) → panel hidden. useDerivative is disabled for non-crypto.
