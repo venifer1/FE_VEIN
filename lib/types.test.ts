@@ -4,9 +4,11 @@ import {
   signalPathId,
   instrumentPathId,
   timeframesForMarket,
+  indicesByKey,
   COIN_TIMEFRAMES,
   STOCK_TIMEFRAMES,
 } from "./types";
+import type { MarketIndexRow } from "./types";
 
 // 순수 헬퍼 회귀 보호(R122).
 
@@ -25,6 +27,29 @@ describe("stripIdPrefix", () => {
   it("signalPathId/instrumentPathId are the same stripper", () => {
     expect(signalPathId("sig_9")).toBe("9");
     expect(instrumentPathId("ins_9")).toBe("9");
+  });
+});
+
+describe("indicesByKey", () => {
+  const rows: MarketIndexRow[] = [
+    { key: "FEAR_GREED", value: "55", classification: "Neutral" },
+    { key: "NASDAQ", value: "18000" },
+  ];
+  it("keys rows by their key", () => {
+    const m = indicesByKey(rows);
+    expect(m.FEAR_GREED?.value).toBe("55");
+    expect(m.NASDAQ?.value).toBe("18000");
+  });
+  it("null/undefined -> empty map", () => {
+    expect(indicesByKey(null)).toEqual({});
+    expect(indicesByKey(undefined)).toEqual({});
+  });
+  it("last row wins on duplicate key", () => {
+    const m = indicesByKey([
+      { key: "NASDAQ", value: "1" },
+      { key: "NASDAQ", value: "2" },
+    ]);
+    expect(m.NASDAQ?.value).toBe("2");
   });
 });
 
