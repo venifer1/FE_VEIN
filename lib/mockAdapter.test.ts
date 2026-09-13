@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toCho, isChoQuery, num, trimNum } from "./mockAdapter";
+import { toCho, isChoQuery, num, trimNum, idMatches } from "./mockAdapter";
 
 // 데모(mock) 종목 검색·숫자 표기 순수 헬퍼 회귀 보호(R148).
 
@@ -47,5 +47,31 @@ describe("trimNum (불필요한 소수 0 제거)", () => {
     expect(trimNum(0.1)).toBe("0.1");
     expect(trimNum(100)).toBe("100");
     expect(trimNum(1.23456789)).toBe("1.23456789");
+  });
+});
+
+describe("idMatches (딥링크 경로 id 매칭)", () => {
+  it("matches exact ids (string or number)", () => {
+    expect(idMatches("2", "2")).toBe(true);
+    expect(idMatches(2, "2")).toBe(true);
+    expect(idMatches("usr_2", "usr_2")).toBe(true);
+  });
+
+  it("matches when a single leading alpha prefix is stripped", () => {
+    expect(idMatches("usr_2", "2")).toBe(true);
+    expect(idMatches("paper_1", "1")).toBe(true);
+  });
+
+  it("does not match a different id", () => {
+    expect(idMatches("usr_2", "3")).toBe(false);
+  });
+
+  it("strips only the first alpha_ segment, not nested ones", () => {
+    expect(idMatches("abc_def_2", "2")).toBe(false); // → "def_2" ≠ "2"
+  });
+
+  it("requires an underscore to strip; matching is case-sensitive", () => {
+    expect(idMatches("BTC", "btc")).toBe(false);
+    expect(idMatches("BTC", "BTC")).toBe(true);
   });
 });

@@ -261,7 +261,7 @@ function paperPortfolio() {
 
 // Match a mock entity by id whether the caller passed the prefixed id
 // ("ins_btc", "sig_001") or the bare/stripped form ("btc", "001").
-function idMatches(entityId: string | number, pathId: string): boolean {
+export function idMatches(entityId: string | number, pathId: string): boolean {
   const eid = String(entityId);
   if (eid === pathId) return true;
   const stripped = eid.replace(/^[a-zA-Z]+_/, "");
