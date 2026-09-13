@@ -17,6 +17,7 @@ import {
   scalpRanking,
   getSignalPerformance,
   signals,
+  getSignalDetail,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -265,6 +266,39 @@ describe("getSignalPerformance", () => {
     );
     if (fresh) {
       expect(getSignalPerformance(fresh.id)!.horizons).toEqual([]);
+    }
+  });
+});
+
+describe("getSignalDetail", () => {
+  const algoByType: Record<string, string> = {
+    ABC: "abc-java-1.0.0",
+    TOP: "top-java-1.0.0",
+    IMALOL: "imalol-java-1.0.0",
+  };
+
+  it("returns null for an unknown signal id", () => {
+    expect(getSignalDetail("zzz_nope")).toBeNull();
+  });
+
+  it("finds by full id or numeric suffix and sets 30-day expiry", () => {
+    const s0 = signals[0];
+    const d = getSignalDetail(s0.id);
+    expect(d).not.toBeNull();
+    expect(d!.id).toBe(s0.id);
+    // 유효기간(R85): 탐지시각 + 30일, 결정적
+    const expected = new Date(new Date(s0.detected_at).getTime() + 30 * 86_400_000).toISOString();
+    expect(d!.expires_at).toBe(expected);
+    // 접두사 제거 숫자 조회도 동일 신호
+    expect(getSignalDetail(s0.id.replace(/^[a-zA-Z]+_/, ""))?.id).toBe(s0.id);
+  });
+
+  it("stamps algorithm_version matching the pattern type", () => {
+    for (const type of ["ABC", "TOP", "IMALOL"]) {
+      const s = signals.find((x) => x.type === type);
+      if (s) {
+        expect(getSignalDetail(s.id)!.algorithm_version).toBe(algoByType[type]);
+      }
     }
   });
 });
