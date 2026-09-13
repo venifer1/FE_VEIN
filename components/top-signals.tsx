@@ -41,6 +41,7 @@ export function TopSignalsSection() {
             스캐너 전체 →
           </Link>
         </div>
+        <p className="text-[11px] text-muted-foreground">종합 점수 순 · 완성도+거래량+추세+변동성+뉴스</p>
         <div className="flex gap-1">
           {MARKET_TABS.map((t) => (
             <button
