@@ -6,7 +6,7 @@ import { formatRelative } from "@/lib/format";
 const STATUS_LABEL: Record<SignalStatus, string> = {
   DETECTED: "탐지",
   NEAR_COMPLETION: "완성 임박",
-  INVALIDATED: "무효",
+  INVALIDATED: "실패",
   EXPIRED: "만료",
   CLOSED: "종료",
 };

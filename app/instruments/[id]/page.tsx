@@ -177,7 +177,7 @@ function InstrumentInner() {
               showMA ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground",
             )}
           >
-            MA
+            이동평균
           </button>
           <button
             type="button"
