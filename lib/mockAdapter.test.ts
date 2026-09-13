@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { toCho, isChoQuery, num, trimNum, idMatches } from "./mockAdapter";
+import { toCho, isChoQuery, num, trimNum, idMatches, parseUrl, body } from "./mockAdapter";
+import type { InternalAxiosRequestConfig } from "axios";
+
+const cfg = (url?: string, params?: unknown, data?: unknown) =>
+  ({ url, params, data }) as unknown as InternalAxiosRequestConfig;
 
 // 데모(mock) 종목 검색·숫자 표기 순수 헬퍼 회귀 보호(R148).
 
@@ -73,5 +77,50 @@ describe("idMatches (딥링크 경로 id 매칭)", () => {
   it("requires an underscore to strip; matching is case-sensitive", () => {
     expect(idMatches("BTC", "btc")).toBe(false);
     expect(idMatches("BTC", "BTC")).toBe(true);
+  });
+});
+
+describe("parseUrl (경로/쿼리 파싱)", () => {
+  it("splits path and query string, strips trailing slashes", () => {
+    const { path, params } = parseUrl(cfg("/signals/top?limit=5"));
+    expect(path).toBe("/signals/top");
+    expect(params.get("limit")).toBe("5");
+    expect(parseUrl(cfg("/signals/")).path).toBe("/signals");
+    expect(parseUrl(cfg("/a/b///")).path).toBe("/a/b");
+  });
+
+  it("merges config.params, skipping undefined/null/empty and stringifying", () => {
+    const { params } = parseUrl(cfg("/x", { a: 1, b: "", c: null, d: undefined, e: "z" }));
+    expect(params.get("a")).toBe("1");
+    expect(params.get("e")).toBe("z");
+    expect(params.has("b")).toBe(false);
+    expect(params.has("c")).toBe(false);
+    expect(params.has("d")).toBe(false);
+  });
+
+  it("config.params overrides a query value with the same key", () => {
+    expect(parseUrl(cfg("/x?a=1", { a: 2 })).params.get("a")).toBe("2");
+  });
+
+  it("handles missing url and empty query", () => {
+    expect(parseUrl(cfg(undefined)).path).toBe("");
+    expect([...parseUrl(cfg("/x")).params.keys()]).toEqual([]);
+  });
+});
+
+describe("body (요청 본문 파싱)", () => {
+  it("parses JSON string data", () => {
+    expect(body(cfg("/x", undefined, '{"a":1}'))).toEqual({ a: 1 });
+  });
+
+  it("returns {} for invalid JSON string or no data", () => {
+    expect(body(cfg("/x", undefined, "not json"))).toEqual({});
+    expect(body(cfg("/x"))).toEqual({});
+    expect(body(cfg("/x", undefined, ""))).toEqual({});
+  });
+
+  it("passes an object body through unchanged", () => {
+    const obj = { a: 1, nested: { b: 2 } };
+    expect(body(cfg("/x", undefined, obj))).toBe(obj);
   });
 });

@@ -172,7 +172,7 @@ function fail(config: InternalAxiosRequestConfig, status: number, code: string, 
   throw err;
 }
 
-function parseUrl(config: InternalAxiosRequestConfig): { path: string; params: URLSearchParams } {
+export function parseUrl(config: InternalAxiosRequestConfig): { path: string; params: URLSearchParams } {
   const raw = config.url ?? "";
   const [p, q] = raw.split("?");
   const params = new URLSearchParams(q ?? "");
@@ -184,7 +184,7 @@ function parseUrl(config: InternalAxiosRequestConfig): { path: string; params: U
   return { path: p.replace(/\/+$/, ""), params };
 }
 
-function body(config: InternalAxiosRequestConfig): any {
+export function body(config: InternalAxiosRequestConfig): any {
   if (!config.data) return {};
   if (typeof config.data === "string") {
     try {
