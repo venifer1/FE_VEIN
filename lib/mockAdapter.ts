@@ -74,7 +74,7 @@ function buildOnboarding() {
 }
 
 // 백엔드 NotificationDigest.summarize와 동일 계약을 목으로 재현한다(읽기 시점 요약).
-function buildNotificationDigest(all: Notification[], windowHours: number): NotificationDigest {
+export function buildNotificationDigest(all: Notification[], windowHours: number): NotificationDigest {
   const since = Date.now() - windowHours * 3_600_000;
   const rows = all
     .filter((n) => new Date(n.created_at).getTime() >= since)

@@ -1,6 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { toCho, isChoQuery, num, trimNum, idMatches, parseUrl, body } from "./mockAdapter";
+import {
+  toCho,
+  isChoQuery,
+  num,
+  trimNum,
+  idMatches,
+  parseUrl,
+  body,
+  buildNotificationDigest,
+} from "./mockAdapter";
 import type { InternalAxiosRequestConfig } from "axios";
+import type { Notification } from "./types";
 
 const cfg = (url?: string, params?: unknown, data?: unknown) =>
   ({ url, params, data }) as unknown as InternalAxiosRequestConfig;
@@ -77,6 +87,55 @@ describe("idMatches (딥링크 경로 id 매칭)", () => {
   it("requires an underscore to strip; matching is case-sensitive", () => {
     expect(idMatches("BTC", "btc")).toBe(false);
     expect(idMatches("BTC", "BTC")).toBe(true);
+  });
+});
+
+describe("buildNotificationDigest (알림 다이제스트 R45)", () => {
+  let seq = 0;
+  const notif = (o: Partial<Notification>): Notification => ({
+    id: ++seq,
+    status: "SENT",
+    created_at: new Date(Date.now() - 60_000).toISOString(), // 1분 전(창 안)
+    ...o,
+  });
+
+  it("categorizes by signal_id and title prefix, counts unread", () => {
+    const d = buildNotificationDigest(
+      [
+        notif({ signal_id: 5 }), // SIGNAL (unread)
+        notif({ title: "Scanner match: RSI<30", read_at: new Date().toISOString() }), // SCANNER (read)
+        notif({ title: "Liquidation spike on BTC" }), // LIQUIDATION (unread)
+        notif({ title: "안내 메시지", status: "READ" }), // SYSTEM (read via status)
+      ],
+      24,
+    );
+    expect(d.total).toBe(4);
+    expect(d.unread).toBe(2); // signal + liquidation
+    const byCat = Object.fromEntries(d.categories.map((c) => [c.category, c]));
+    expect(byCat.SIGNAL.total).toBe(1);
+    expect(byCat.SCANNER.total).toBe(1);
+    expect(byCat.LIQUIDATION.total).toBe(1);
+    expect(byCat.SYSTEM.total).toBe(1);
+    expect(byCat.SIGNAL.unread).toBe(1);
+    expect(byCat.SCANNER.unread).toBe(0);
+  });
+
+  it("excludes notifications older than the window", () => {
+    const d = buildNotificationDigest(
+      [
+        notif({ created_at: new Date(Date.now() - 60_000).toISOString() }), // 1분 전 → 포함
+        notif({ created_at: new Date(Date.now() - 5 * 3_600_000).toISOString() }), // 5시간 전 → 제외
+      ],
+      1, // 창 1시간
+    );
+    expect(d.total).toBe(1);
+  });
+
+  it("empty window yields a zero digest", () => {
+    const d = buildNotificationDigest([], 24);
+    expect(d.total).toBe(0);
+    expect(d.unread).toBe(0);
+    expect(d.categories).toEqual([]);
   });
 });
 
