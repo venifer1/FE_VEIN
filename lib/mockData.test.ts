@@ -18,6 +18,7 @@ import {
   getSignalPerformance,
   signals,
   getSignalDetail,
+  genCandles,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -300,6 +301,41 @@ describe("getSignalDetail", () => {
         expect(getSignalDetail(s.id)!.algorithm_version).toBe(algoByType[type]);
       }
     }
+  });
+});
+
+describe("genCandles", () => {
+  it("returns `count` candles (default 200)", () => {
+    expect(genCandles("ins_btc", "1d", 50)).toHaveLength(50);
+    expect(genCandles("ins_btc", "1d")).toHaveLength(200);
+  });
+
+  it("every candle is OHLC-valid (high≥open/close≥low)", () => {
+    for (const c of genCandles("ins_eth", "4h", 60)) {
+      const [o, h, l, cl] = [c.open, c.high, c.low, c.close].map(Number);
+      expect(h).toBeGreaterThanOrEqual(Math.max(o, cl));
+      expect(l).toBeLessThanOrEqual(Math.min(o, cl));
+      expect(h).toBeGreaterThanOrEqual(l);
+      expect(Number(c.volume)).toBeGreaterThan(0);
+    }
+  });
+
+  it("is contiguous: each open equals the previous close, times step evenly", () => {
+    const cs = genCandles("ins_sol", "1h", 40);
+    for (let i = 1; i < cs.length; i++) {
+      expect(cs[i].open).toBe(cs[i - 1].close); // 가격 연속성
+    }
+    const step = new Date(cs[1].open_time).getTime() - new Date(cs[0].open_time).getTime();
+    for (let i = 1; i < cs.length; i++) {
+      const gap = new Date(cs[i].open_time).getTime() - new Date(cs[i - 1].open_time).getTime();
+      expect(gap).toBe(step); // 균등 간격
+    }
+  });
+
+  it("is deterministic (seeded) for the same instrument+timeframe", () => {
+    const a = genCandles("ins_btc", "1d", 30).map((c) => c.close);
+    const b = genCandles("ins_btc", "1d", 30).map((c) => c.close);
+    expect(a).toEqual(b);
   });
 });
 
