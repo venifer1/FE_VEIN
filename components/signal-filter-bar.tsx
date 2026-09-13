@@ -4,12 +4,14 @@ import { cn } from "@/lib/utils";
 import type { SignalFilter } from "@/lib/queries";
 import type { Market, SignalType, Timeframe } from "@/lib/types";
 import { timeframesForMarket } from "@/lib/types";
+import { SIGNAL_TYPE_LABEL } from "@/components/badges";
 
+// 패턴 라벨은 badges의 SIGNAL_TYPE_LABEL 단일 소스를 재사용(카드 배지와 드리프트 방지, R99).
 const TYPES: { value: SignalType | undefined; label: string }[] = [
   { value: undefined, label: "전체" },
-  { value: "ABC", label: "ABC" },
-  { value: "TOP", label: "고점되돌림" },
-  { value: "IMALOL", label: "이말올" },
+  { value: "ABC", label: SIGNAL_TYPE_LABEL.ABC },
+  { value: "TOP", label: SIGNAL_TYPE_LABEL.TOP },
+  { value: "IMALOL", label: SIGNAL_TYPE_LABEL.IMALOL },
 ];
 const MARKETS: { value: Market | undefined; label: string }[] = [
   { value: undefined, label: "전체" },
