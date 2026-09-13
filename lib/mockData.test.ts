@@ -1,6 +1,35 @@
 import { describe, it, expect } from "vitest";
-import { getSignalPerformanceSummary, classifyFg, metricsFromTrades } from "./mockData";
+import { getSignalPerformanceSummary, classifyFg, metricsFromTrades, getMovers } from "./mockData";
 import type { BacktestTrade } from "./types";
+
+// 등락 순위(movers) 시장·타입 라우팅 + 거래대금 정렬 회귀 보호(R147).
+const isSortedDesc = (rows: { trade_value24h?: string | null }[]) =>
+  rows.every(
+    (r, i) => i === 0 || Number(rows[i - 1].trade_value24h ?? 0) >= Number(r.trade_value24h ?? 0),
+  );
+
+describe("getMovers", () => {
+  it("GAINERS rows are all non-negative, LOSERS all negative (CRYPTO default)", () => {
+    expect(getMovers("GAINERS").every((r) => Number(r.change_rate) >= 0)).toBe(true);
+    expect(getMovers("LOSERS").every((r) => Number(r.change_rate) < 0)).toBe(true);
+  });
+
+  it("VOLUME is sorted by trade_value24h descending across markets", () => {
+    expect(isSortedDesc(getMovers("VOLUME", "CRYPTO"))).toBe(true);
+    expect(isSortedDesc(getMovers("VOLUME", "US"))).toBe(true);
+    expect(isSortedDesc(getMovers("VOLUME", "KOSPI"))).toBe(true);
+  });
+
+  it("defaults to CRYPTO market when none is given", () => {
+    expect(getMovers("GAINERS")).toEqual(getMovers("GAINERS", "CRYPTO"));
+    expect(getMovers("LOSERS")).toEqual(getMovers("LOSERS", "CRYPTO"));
+  });
+
+  it("US VOLUME merges gainers and losers", () => {
+    const merged = getMovers("VOLUME", "US").length;
+    expect(merged).toBe(getMovers("GAINERS", "US").length + getMovers("LOSERS", "US").length);
+  });
+});
 
 // 데모 백테스트 지표 집계(승률·손익비·복리수익·MDD) 회귀 보호(R146).
 const trade = (return_pct: string | null): BacktestTrade => ({ symbol: "X", return_pct });
