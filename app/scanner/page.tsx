@@ -91,14 +91,14 @@ function PerformanceSummaryStrip({ filter }: { filter: SignalFilter }) {
           <span aria-hidden>·</span>
           <span>{row.timeframe}</span>
           <span aria-hidden>·</span>
-          <span>표본 {row.sample_size}</span>
+          <span>사례 {row.sample_size}건</span>
           <span aria-hidden>·</span>
-          <span>적중률 {row.hit_rate ?? "-"}%</span>
+          <span>성공률 {row.hit_rate ?? "-"}%</span>
           <span aria-hidden>·</span>
           <span>평균 {formatPct(row.avg_return_pct)}</span>
           {(row.sample_size ?? 0) < 20 && (
             <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-medium text-amber-600">
-              표본 부족 · 참고만
+              사례 적음 · 참고만
             </span>
           )}
         </p>
@@ -198,14 +198,15 @@ function ScalpRanking() {
   return (
     <div className="space-y-2 p-4">
       <p className="text-xs text-muted-foreground">
-        업비트 24시간 거래대금 상위 마켓의 실시간 스캘핑 점수입니다. 서버 수집값을 기준으로 표시합니다.
+        업비트 거래대금 상위 종목의 실시간 단타 점수(틱띄기)입니다. 호가차=스프레드,
+        초당체결=TPS, 쏠림=호가 불균형, 벽=대량 대기주문.
       </p>
       {isLoading ? (
         <Skeleton className="h-48 w-full" />
       ) : isError ? (
         <ErrorState error={error} onRetry={() => refetch()} />
       ) : rows.length === 0 ? (
-        <EmptyState title="스캘핑 데이터가 없습니다" />
+        <EmptyState title="틱띄기 데이터가 없습니다" />
       ) : (
         rows.map((r) => (
           <Link key={r.symbol} href={`/scalp/${encodeURIComponent(r.symbol)}`} className="block">
@@ -217,10 +218,10 @@ function ScalpRanking() {
                     <span className="text-xs text-muted-foreground">{r.name}</span>
                   </div>
                   <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground tabular-nums">
-                    <span>스프레드 {n2(r.spread_ticks)}틱</span>
-                    <span>TPS {n2(r.tps)}</span>
-                    <span>마이크로변동 {n2(r.micro_vol)}</span>
-                    <span>불균형 {n2(r.ob_imbalance)}</span>
+                    <span>호가차 {n2(r.spread_ticks)}틱</span>
+                    <span>초당체결 {n2(r.tps)}</span>
+                    <span>순간변동 {n2(r.micro_vol)}</span>
+                    <span>쏠림 {n2(r.ob_imbalance)}</span>
                     <span>벽 {r.wall_state}</span>
                   </div>
                 </div>

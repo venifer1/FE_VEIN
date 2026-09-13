@@ -130,7 +130,7 @@ function AlertRuleRow({ alert }: { alert: Alert }) {
             {alert.timeframe && <span className="rounded bg-secondary px-1.5 py-0.5 text-xs">{alert.timeframe}</span>}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            {alert.market ?? "-"} · 쿨다운 {alert.cooldown_sec}s
+            {alert.market ?? "-"} · 재알림 간격 {alert.cooldown_sec}초
           </p>
         </div>
         <Switch
@@ -159,7 +159,7 @@ function AlertRuleRow({ alert }: { alert: Alert }) {
         ) : (
           <>
             <button className="text-xs text-muted-foreground underline" onClick={() => setEditing(true)}>
-              쿨다운 수정
+              재알림 간격 수정
             </button>
             <button
               className="ml-auto text-xs text-destructive underline disabled:opacity-50"

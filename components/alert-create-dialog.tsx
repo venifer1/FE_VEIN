@@ -112,10 +112,10 @@ export function AlertCreateDialog({
             ) : (
               <form onSubmit={onSubmit} className="mt-4 space-y-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="cooldown">쿨다운 (초)</Label>
+                  <Label htmlFor="cooldown">재알림 최소 간격 (초, 쿨다운)</Label>
                   <Input id="cooldown" type="number" min={1} {...register("cooldown_sec")} />
                   {errors.cooldown_sec && <p className="text-xs text-destructive">{errors.cooldown_sec.message}</p>}
-                  <p className="text-xs text-muted-foreground">쿨다운 내 중복 알림은 1건으로 제한됩니다.</p>
+                  <p className="text-xs text-muted-foreground">이 시간 안에 같은 알림이 또 떠도 1건만 보냅니다(도배 방지).</p>
                 </div>
                 {alertLimit >= 0 && (
                   <p className="text-xs text-muted-foreground">알림 규칙 {alertUsed}/{alertLimit}개 사용 중</p>

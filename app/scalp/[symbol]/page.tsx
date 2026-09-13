@@ -47,11 +47,11 @@ function ScalpDetailInner() {
               <CardContent className="flex items-center justify-between">
                 <div>
                   <p className="font-semibold">{detail.symbol}</p>
-                  <p className="text-xs text-muted-foreground">벽 상태 {detail.wall_state}</p>
+                  <p className="text-xs text-muted-foreground">대기주문 벽 {detail.wall_state}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-bold text-primary tabular-nums">{formatScore(detail.scalp_score)}</p>
-                  <p className="text-[10px] text-muted-foreground">스캘핑 점수</p>
+                  <p className="text-[10px] text-muted-foreground">틱띄기 점수</p>
                 </div>
               </CardContent>
             </Card>
@@ -73,7 +73,7 @@ function ScalpDetailInner() {
             <Card>
               <CardContent className="space-y-1">
                 <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-sm font-semibold">호가 상위 레벨</h2>
+                  <h2 className="text-sm font-semibold">호가창 <span className="text-xs font-normal text-muted-foreground">(매수·매도 대기)</span></h2>
                   {detail.wall_cancel_warning && (
                     <span className="rounded bg-[hsl(var(--warning))]/15 px-2 py-0.5 text-[10px] text-[hsl(var(--warning))]">
                       벽 취소 위험

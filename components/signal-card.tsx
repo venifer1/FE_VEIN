@@ -91,7 +91,7 @@ export function SignalCard({ signal, perfHint }: { signal: Signal; perfHint?: Si
                 <>
                   <span aria-hidden>·</span>
                   <span className="rounded bg-secondary px-1.5 py-0.5 text-foreground">
-                    과거 적중 {perfHint!.hitRate}% <span className="text-muted-foreground">(n{perfHint!.sampleSize})</span>
+                    과거 성공 {perfHint!.hitRate}% <span className="text-muted-foreground">({perfHint!.sampleSize}건)</span>
                   </span>
                 </>
               )}

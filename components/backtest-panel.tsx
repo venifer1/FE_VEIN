@@ -108,8 +108,8 @@ function MetricsGrid({ metrics }: { metrics: BacktestMetrics }) {
       <Metric label="승률" value={winRate} />
       <Metric label="평균수익" value={formatPct(metrics.avg_return_pct)} sign={pctSign(metrics.avg_return_pct)} />
       <Metric label="누적수익" value={formatPct(metrics.total_return_pct)} sign={pctSign(metrics.total_return_pct)} />
-      <Metric label="Profit Factor" value={pf} />
-      <Metric label="MDD" value={mdd} sign={mdd === "-" ? 0 : -1} />
+      <Metric label="손익 배수" value={pf} />
+      <Metric label="최대 낙폭" value={mdd} sign={mdd === "-" ? 0 : -1} />
       <Metric label="최고" value={formatPct(best)} sign={pctSign(best)} />
       <Metric label="최저" value={formatPct(worst)} sign={pctSign(worst)} />
     </div>
@@ -169,29 +169,33 @@ function WalkForwardBlock({ wf }: { wf: BacktestWalkForward }) {
     <div className="rounded-lg border border-border bg-card p-3">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium">워크포워드 검증</p>
+          <p className="text-sm font-medium">실전 검증 (워크포워드)</p>
           {ratioPct && (
-            <span className="text-[11px] text-muted-foreground">IS {ratioPct}</span>
+            <span className="text-[11px] text-muted-foreground">학습 {ratioPct}</span>
           )}
         </div>
         {overfit ? (
           <Badge variant="destructive" className="text-xs font-semibold">
-            ⚠ 과적합 주의
+            ⚠ 과최적화 주의 (과적합)
           </Badge>
         ) : (
           <span className="text-[11px] text-[hsl(var(--success))]">검증 통과</span>
         )}
       </div>
+      <p className="mb-2 text-[11px] text-muted-foreground">
+        과거 앞부분으로 규칙을 세우고(학습), 나중 구간에서 그대로 검증합니다. 학습만 잘 맞고
+        검증이 나쁘면 &quot;과거에만 맞춘 것(과최적화)&quot;일 수 있습니다.
+      </p>
       <div className="mb-1 grid grid-cols-[1fr_auto_auto] gap-2">
         <span />
-        <span className="w-16 text-right text-[11px] font-medium text-muted-foreground">In-Sample</span>
-        <span className="w-16 text-right text-[11px] font-medium text-muted-foreground">Out-of-Sample</span>
+        <span className="w-16 text-right text-[11px] font-medium text-muted-foreground">학습 구간</span>
+        <span className="w-16 text-right text-[11px] font-medium text-muted-foreground">검증 구간</span>
       </div>
       <WalkForwardRow label="거래수" is={String(is.trade_count ?? 0)} oos={String(oos.trade_count ?? 0)} />
       <WalkForwardRow label="승률" is={pctOrDash(is.win_rate)} oos={pctOrDash(oos.win_rate)} />
       <WalkForwardRow label="평균수익" is={formatPct(is.avg_return_pct)} oos={formatPct(oos.avg_return_pct)} sign />
       <WalkForwardRow label="누적수익" is={formatPct(is.total_return_pct)} oos={formatPct(oos.total_return_pct)} sign />
-      <WalkForwardRow label="Profit Factor" is={is.profit_factor ?? "-"} oos={oos.profit_factor ?? "-"} />
+      <WalkForwardRow label="손익 배수" is={is.profit_factor ?? "-"} oos={oos.profit_factor ?? "-"} />
       <WalkForwardRow label="MDD" is={pctOrDash(is.max_drawdown_pct)} oos={pctOrDash(oos.max_drawdown_pct)} />
       {overfit && (
         <p className="mt-2 text-[11px] text-muted-foreground">
@@ -683,15 +687,15 @@ export function BacktestPanel() {
         <div className="space-y-3 rounded-md border border-border p-3">
           <div className="flex items-center justify-between">
             <div className="min-w-0">
-              <Label htmlFor="bt-wf" className="text-sm font-medium">워크포워드 검증</Label>
+              <Label htmlFor="bt-wf" className="text-sm font-medium">실전 검증 (워크포워드)</Label>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                기간을 학습(IS)·검증(OOS)으로 나눠 과적합 여부를 점검합니다.
+                기간을 학습·검증 구간으로 나눠, 과거에만 맞춘 것(과최적화)인지 점검합니다.
               </p>
             </div>
             <Switch
               checked={walkForward}
               onCheckedChange={setWalkForward}
-              aria-label="워크포워드 검증"
+              aria-label="실전 검증 (워크포워드)"
             />
           </div>
           {walkForward && (

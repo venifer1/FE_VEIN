@@ -354,7 +354,7 @@ export function ChartView({
         lineWidth: 1,
         lineStyle: LineStyle.Dotted,
         axisLabelVisible: true,
-        title: "무효화",
+        title: "실패선",
       }));
     }
   }, [evidence, invalidation]);

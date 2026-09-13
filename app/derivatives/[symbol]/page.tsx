@@ -115,7 +115,7 @@ function DerivativeDetailInner() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-md border border-border px-2 py-1.5">
-                    <p className="text-[10px] text-muted-foreground">펀딩비</p>
+                    <p className="text-[10px] text-muted-foreground">펀딩비(선물 보유료)</p>
                     <p
                       className={cn(
                         "font-semibold tabular-nums",
@@ -126,10 +126,13 @@ function DerivativeDetailInner() {
                     </p>
                   </div>
                   <div className="rounded-md border border-border px-2 py-1.5">
-                    <p className="text-[10px] text-muted-foreground">미결제약정</p>
+                    <p className="text-[10px] text-muted-foreground">미결제약정(OI)</p>
                     <p className="font-semibold tabular-nums">{compactUsd(detail.oi_value_usd)}</p>
                   </div>
                 </div>
+                <p className="text-[10px] text-muted-foreground">
+                  펀딩비: 선물을 들고 있을 때 주고받는 수수료(+면 롱이 지불) · 미결제약정(OI): 아직 청산 안 된 선물 계약 규모
+                </p>
                 {detail.next_funding_at && (
                   <p className="text-[11px] text-muted-foreground">다음 펀딩 {formatTime(detail.next_funding_at)}</p>
                 )}

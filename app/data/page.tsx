@@ -54,6 +54,7 @@ function TvlTab() {
 
   return (
     <div className="space-y-2 p-4">
+      <p className="text-[11px] text-muted-foreground">예치금(TVL): 프로토콜·체인에 맡겨진 총 자산 규모</p>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex gap-1">
           {(["PROTOCOL", "CHAIN"] as TvlMode[]).map((item) => (
@@ -81,7 +82,7 @@ function TvlTab() {
                 sort === item ? "bg-primary/15 text-primary" : "text-muted-foreground",
               )}
             >
-              {item === "TVL" ? "TVL순" : "7일 변동순"}
+              {item === "TVL" ? "예치금순" : "7일 변동순"}
             </button>
           ))}
         </div>
@@ -133,7 +134,7 @@ function SupplyTab() {
         {([
           ["market_cap", "시총순"],
           ["circulating_pct", "유통률순"],
-          ["fdv", "FDV순"],
+          ["fdv", "총가치순"],
         ] as const).map(([item, label]) => (
           <button
             key={item}
@@ -180,7 +181,7 @@ function SupplyTab() {
                   </span>
                 </div>
                 <p className="text-[11px] text-muted-foreground tabular-nums">
-                  FDV {compactUsd(row.fdv)} · 유통량 {Number(row.circulating).toLocaleString()}
+                  총가치 {compactUsd(row.fdv)}<span className="text-muted-foreground/70">(FDV)</span> · 유통량 {Number(row.circulating).toLocaleString()}
                 </p>
               </CardContent>
             </Card>
@@ -393,7 +394,7 @@ function DerivativesTab() {
 
   return (
     <div className="space-y-2 p-4">
-      <p className="text-[11px] text-muted-foreground">무기한 선물 · 펀딩비 / 미결제약정 / 롱숏 비율</p>
+      <p className="text-[11px] text-muted-foreground">무기한 선물 · 펀딩비(보유료) / 미결제약정(OI) / 롱·숏 비율</p>
 
       {isLoading ? (
         <Skeleton className="h-48 w-full" />
@@ -591,10 +592,10 @@ function LiquidationsTab() {
 }
 
 const TABS: { value: SubTab; label: string }[] = [
-  { value: "tvl", label: "TVL" },
+  { value: "tvl", label: "예치금" },
   { value: "supply", label: "유통량" },
   { value: "theme", label: "테마/섹터" },
-  { value: "funding", label: "펀비차익" },
+  { value: "funding", label: "펀딩차익" },
   { value: "deriv", label: "파생" },
   { value: "liquidation", label: "청산" },
 ];

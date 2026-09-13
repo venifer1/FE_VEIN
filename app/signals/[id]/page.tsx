@@ -91,7 +91,7 @@ function SignalActionPanel({
             <h2 className="text-sm font-semibold">다음 액션</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">신호를 바로 검증하거나 모의 포지션으로 이어갑니다.</p>
           </div>
-          {blocked && <Badge variant="destructive">Risk Guard BLOCK</Badge>}
+          {blocked && <Badge variant="destructive">위험 차단 (Risk Guard)</Badge>}
         </div>
         <div className={cn("grid gap-2", isCrypto ? "grid-cols-2" : "grid-cols-1")}>
           <Input inputMode="decimal" value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="수량" />
@@ -210,10 +210,10 @@ function PerformancePanel({ signal }: { signal: SignalDetail }) {
             <p className="mt-1 text-xs text-muted-foreground">같은 유형의 과거 표본이 아직 없습니다.</p>
           ) : (
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-              <span className="text-muted-foreground">표본 {brRow.sample_size}</span>
+              <span className="text-muted-foreground">사례 {brRow.sample_size}건</span>
               <span aria-hidden>·</span>
               <span>
-                1일 적중률 <span className="font-semibold tabular-nums">{brRow.hit_rate ?? "-"}%</span>
+                1일 성공률 <span className="font-semibold tabular-nums">{brRow.hit_rate ?? "-"}%</span>
               </span>
               <span aria-hidden>·</span>
               <span>
@@ -224,7 +224,7 @@ function PerformancePanel({ signal }: { signal: SignalDetail }) {
               </span>
               {(brRow.sample_size ?? 0) < 20 && (
                 <span className="rounded bg-amber-500/15 px-1.5 py-0.5 font-medium text-amber-600">
-                  표본 부족 · 참고만
+                  사례 적음 · 참고만
                 </span>
               )}
             </div>
@@ -232,7 +232,10 @@ function PerformancePanel({ signal }: { signal: SignalDetail }) {
         </div>
 
         <div>
-          <p className="mb-1 text-[11px] font-medium text-muted-foreground">이 신호 성과</p>
+          <p className="mb-0.5 text-[11px] font-medium text-muted-foreground">이 신호 성과</p>
+          <p className="mb-1 text-[10px] text-muted-foreground">
+            최고 상승(MFE)·최대 하락(MAE)은 각 기간 중 가장 크게 오른/내린 폭입니다.
+          </p>
           {isLoading ? (
             <Skeleton className="h-16 w-full" />
           ) : horizons.length === 0 ? (
@@ -249,8 +252,8 @@ function PerformancePanel({ signal }: { signal: SignalDetail }) {
                       {formatPct(h.return_pct)}
                     </span>
                     <div className="mt-0.5 flex justify-end gap-2 text-[10px] text-muted-foreground tabular-nums">
-                      <span>MFE {formatPct(h.mfe_pct)}</span>
-                      <span>MAE {formatPct(h.mae_pct)}</span>
+                      <span>최고 {formatPct(h.mfe_pct)}</span>
+                      <span>최저 {formatPct(h.mae_pct)}</span>
                     </div>
                   </div>
                 </li>
@@ -290,9 +293,9 @@ function ExplainPanel({ id }: { id: string }) {
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">Pattern Score · 근거 설명</h2>
+            <h2 className="text-sm font-semibold">패턴 점수 (Pattern Score) · 근거 설명</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              구조 점수와 별도로 계산한 규칙 기반 참고 점수입니다.
+              완성도·거래량·추세·변동성·뉴스를 합산한 참고 점수입니다(구조 점수와 별개).
             </p>
           </div>
           <div className="text-right">
@@ -304,11 +307,11 @@ function ExplainPanel({ id }: { id: string }) {
         <div className="flex flex-wrap gap-2">
           <Badge variant={risk.variant}>{risk.text}</Badge>
           <Badge variant="secondary">
-            신뢰도 {CONFIDENCE_LABEL[data.confidence.grade]} · 표본 {data.confidence.sample_size}
+            신뢰도 {CONFIDENCE_LABEL[data.confidence.grade]} · 사례 {data.confidence.sample_size}건
           </Badge>
           {data.confidence.hit_rate && (
             <Badge variant="outline">
-              {data.confidence.horizon} 적중률 {formatPct(data.confidence.hit_rate)}
+              {data.confidence.horizon} 성공률 {formatPct(data.confidence.hit_rate)}
             </Badge>
           )}
         </div>
@@ -513,7 +516,7 @@ function DetailInner() {
           <>
             {signal.status === "INVALIDATED" && (
               <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                이 신호는 무효화되었습니다. 규칙: {signal.invalidation?.rule ?? "-"}
+                이 신호는 실패로 종료됐습니다 (무효화). 규칙: {signal.invalidation?.rule ?? "-"}
               </div>
             )}
             {signal.status === "EXPIRED" && (
@@ -630,22 +633,23 @@ function DetailInner() {
 
             <Card>
               <CardContent className="space-y-1">
-                <h2 className="text-sm font-semibold">무효화 기준</h2>
+                <h2 className="text-sm font-semibold">실패 기준 (무효화)</h2>
+                <p className="text-xs text-muted-foreground">아래 가격이 깨지면 이 신호는 실패로 봅니다.</p>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">규칙</span>
+                  <span className="text-muted-foreground">판정 규칙</span>
                   <span className="font-mono">{signal.invalidation?.rule ?? "-"}</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">기준선</span>
+                  <span className="text-muted-foreground">기준 가격</span>
                   <span className="font-mono">{formatPrice(signal.invalidation?.price)}</span>
                 </div>
                 {signal.invalidation?.effective_price && (
                   <>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">
-                        실질 무효화가
+                        실제 실패가
                         {signal.invalidation?.buffer_pct
-                          ? ` (−${(Number(signal.invalidation.buffer_pct) * 100).toFixed(1)}% 완충)`
+                          ? ` (−${(Number(signal.invalidation.buffer_pct) * 100).toFixed(1)}% 여유)`
                           : ""}
                       </span>
                       <span className="font-mono text-red-500">
@@ -653,8 +657,8 @@ function DetailInner() {
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      기준선을 살짝 이탈하는 노이즈성 하락은 무효화하지 않고, 저가가 실질 무효화가
-                      아래로 내려가야 무효 처리됩니다(R53).
+                      기준 가격을 살짝 스치는 잠깐의 하락(꼬리·노이즈)은 실패로 보지 않고, 저가가
+                      실제 실패가 아래로 내려가야 실패 처리합니다.
                     </p>
                   </>
                 )}
@@ -678,12 +682,12 @@ function DetailInner() {
                         <span className="font-mono text-emerald-600">{up >= 0 ? "+" : ""}{up.toFixed(1)}%</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">무효화까지</span>
+                        <span className="text-muted-foreground">실패까지</span>
                         <span className="font-mono text-red-500">{down >= 0 ? "+" : ""}{down.toFixed(1)}%</span>
                       </div>
                       {rr != null && (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">손익비(R:R)</span>
+                          <span className="text-muted-foreground">기대수익÷손실 (손익비)</span>
                           <span className="font-mono">{rr.toFixed(2)} : 1</span>
                         </div>
                       )}

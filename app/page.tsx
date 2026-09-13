@@ -183,8 +183,8 @@ function IndicesSection() {
         <div className="grid grid-cols-2 gap-2">
           <FearGreedMetric value={fg?.value} classification={fg?.classification} />
           <IndexMetric label="알트코인 지수" indexKey="ALT_INDEX" value={idx.ALT_INDEX?.value} fmt={(v) => fmtNum(v, 0)} />
-          <IndexMetric label="BTC 도미넌스" indexKey="BTC_DOMINANCE" value={idx.BTC_DOMINANCE?.value} fmt={(v) => `${fmtNum(v)}%`} />
-          <IndexMetric label="USDT 도미넌스" indexKey="USDT_DOMINANCE" value={idx.USDT_DOMINANCE?.value} fmt={(v) => `${fmtNum(v)}%`} />
+          <IndexMetric label="BTC 점유율" indexKey="BTC_DOMINANCE" value={idx.BTC_DOMINANCE?.value} fmt={(v) => `${fmtNum(v)}%`} />
+          <IndexMetric label="USDT 점유율" indexKey="USDT_DOMINANCE" value={idx.USDT_DOMINANCE?.value} fmt={(v) => `${fmtNum(v)}%`} />
           <IndexMetric label="나스닥" indexKey="NASDAQ" value={idx.NASDAQ?.value} fmt={(v) => fmtNum(v)} />
           <IndexMetric label="코스피" indexKey="KOSPI" value={idx.KOSPI?.value} fmt={(v) => fmtNum(v)} />
           <IndexMetric label="코스닥" indexKey="KOSDAQ" value={idx.KOSDAQ?.value} fmt={(v) => fmtNum(v)} />
@@ -241,7 +241,7 @@ function KimchiSection() {
   return (
     <Card>
       <CardContent className="space-y-2">
-        <h2 className="text-sm font-semibold">김치프리미엄</h2>
+        <h2 className="text-sm font-semibold">김치프리미엄 <span className="text-xs font-normal text-muted-foreground">(국내-해외 가격차)</span></h2>
         {isLoading ? (
           <Skeleton className="h-32 w-full" />
         ) : isError ? (
