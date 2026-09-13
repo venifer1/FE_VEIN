@@ -232,7 +232,15 @@ function InstrumentInner() {
             <CardContent className="space-y-1 text-sm">
               <h2 className="text-sm font-semibold">지표 요약 ({tf})</h2>
               <div className="grid grid-cols-3 gap-1 text-[11px] text-muted-foreground tabular-nums">
-                <span>RSI {indicatorsQuery.data.rsi14 ?? "-"}</span>
+                {(() => {
+                  // RSI 과매수(≥70)·과매도(≤30) 색+라벨 — 진입 판단 참고. (R104)
+                  const v = indicatorsQuery.data.rsi14;
+                  const n = Number(v);
+                  const has = v != null && v !== "" && !Number.isNaN(n);
+                  const cls = !has ? "" : n >= 70 ? "text-destructive" : n <= 30 ? "text-[hsl(var(--success))]" : "";
+                  const tag = !has ? "" : n >= 70 ? " 과매수" : n <= 30 ? " 과매도" : "";
+                  return <span className={cls}>RSI {has ? v : "-"}{tag}</span>;
+                })()}
                 <span>MA20 {formatPrice(indicatorsQuery.data.ma20)}</span>
                 <span>MA60 {formatPrice(indicatorsQuery.data.ma60)}</span>
                 <span>볼린저↑ {formatPrice(indicatorsQuery.data.boll_upper)}</span>
