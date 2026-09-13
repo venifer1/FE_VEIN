@@ -5,6 +5,7 @@ import {
   metricsFromTrades,
   getMovers,
   getFearGreedHistory,
+  runBacktest,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -60,6 +61,50 @@ describe("getFearGreedHistory", () => {
   it("orders points oldest→newest by date", () => {
     const dates = getFearGreedHistory(10).map((p) => p.date);
     expect([...dates].sort()).toEqual(dates);
+  });
+});
+
+describe("runBacktest", () => {
+  const input = { type: "ABC", market: "CRYPTO", timeframe: "1d", target_pct: 5, stop_pct: 3 };
+
+  it("is deterministic for identical params (seeded metrics + returns)", () => {
+    const a = runBacktest(input);
+    const b = runBacktest(input);
+    expect(a.metrics).toEqual(b.metrics); // metrics carry no timestamps
+    expect(a.trades.map((t) => t.return_pct)).toEqual(b.trades.map((t) => t.return_pct));
+  });
+
+  it("holds structural invariants (trade count, equity length, best≥worst)", () => {
+    const r = runBacktest(input);
+    expect(r.trades.length).toBeGreaterThanOrEqual(28);
+    expect(r.trades.length).toBeLessThanOrEqual(35);
+    expect(r.metrics.trade_count).toBe(r.trades.length);
+    expect(r.equity_curve).toHaveLength(r.trades.length + 1); // 1.0 seed + one per trade
+    expect(Number(r.metrics.best_pct)).toBeGreaterThanOrEqual(Number(r.metrics.worst_pct));
+  });
+
+  it("echoes params with defaults and no walk-forward unless requested", () => {
+    const r = runBacktest({ type: "TOP" });
+    expect(r.params.type).toBe("TOP");
+    expect(r.params.target_pct).toBe(5); // default
+    expect(r.params.stop_pct).toBe(3); // default
+    expect(r.params.fee_pct).toBe(0.1); // default
+    expect(r.walk_forward).toBeNull();
+  });
+
+  it("produces a walk-forward block with clamped is_ratio when requested", () => {
+    const def = runBacktest({ ...input, walk_forward: true });
+    expect(def.walk_forward?.is_ratio).toBe("0.70"); // default
+    expect(def.walk_forward?.in_sample).toBeTruthy();
+    expect(def.walk_forward?.out_of_sample).toBeTruthy();
+    expect(typeof def.walk_forward?.overfit_warning).toBe("boolean");
+    // is_ratio clamped into [0.5, 0.9]
+    expect(runBacktest({ ...input, walk_forward: true, is_ratio: 0.2 }).walk_forward?.is_ratio).toBe(
+      "0.50",
+    );
+    expect(runBacktest({ ...input, walk_forward: true, is_ratio: 0.99 }).walk_forward?.is_ratio).toBe(
+      "0.90",
+    );
   });
 });
 
