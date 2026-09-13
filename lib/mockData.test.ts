@@ -9,6 +9,8 @@ import {
   getStrategyHistory,
   strategies,
   getThemeConstituents,
+  getTvlHistory,
+  tvlProtocols,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -155,6 +157,29 @@ describe("getThemeConstituents", () => {
 
   it("returns null for an unknown theme id", () => {
     expect(getThemeConstituents("999")).toBeNull();
+  });
+});
+
+describe("getTvlHistory", () => {
+  const id = String(tvlProtocols[0].id);
+
+  it("returns null for an unknown entity id", () => {
+    expect(getTvlHistory("999999")).toBeNull();
+  });
+
+  it("returns a 90-point series for a known entity, dates ascending", () => {
+    const h = getTvlHistory(id);
+    expect(h).not.toBeNull();
+    expect(h!.name).toBe(tvlProtocols[0].name);
+    expect(h!.points).toHaveLength(90);
+    const times = h!.points.map((p) => new Date(p.t).getTime());
+    expect([...times].sort((a, b) => a - b)).toEqual(times);
+  });
+
+  it("is deterministic (seeded) for the same id", () => {
+    const a = getTvlHistory(id)!.points.map((p) => p.tvl);
+    const b = getTvlHistory(id)!.points.map((p) => p.tvl);
+    expect(a).toEqual(b);
   });
 });
 
