@@ -19,6 +19,7 @@ import {
   signals,
   getSignalDetail,
   genCandles,
+  getIndicators,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -336,6 +337,24 @@ describe("genCandles", () => {
     const a = genCandles("ins_btc", "1d", 30).map((c) => c.close);
     const b = genCandles("ins_btc", "1d", 30).map((c) => c.close);
     expect(a).toEqual(b);
+  });
+});
+
+describe("getIndicators", () => {
+  it("echoes timeframe and keeps bollinger bands ordered around the middle", () => {
+    const ind = getIndicators("ins_btc", "1d");
+    expect(ind.timeframe).toBe("1d");
+    expect(ind.boll_middle).toBe(ind.ma20); // 중앙선 = MA20
+    expect(Number(ind.boll_upper)).toBeGreaterThanOrEqual(Number(ind.boll_middle));
+    expect(Number(ind.boll_middle)).toBeGreaterThanOrEqual(Number(ind.boll_lower));
+  });
+
+  it("rsi stays in the demo band [45,65) and macd histogram = macd - signal", () => {
+    const ind = getIndicators("ins_eth", "4h");
+    const rsi = Number(ind.rsi14);
+    expect(rsi).toBeGreaterThanOrEqual(45);
+    expect(rsi).toBeLessThan(65);
+    expect(Number(ind.macd) - Number(ind.macd_signal)).toBeCloseTo(Number(ind.macd_histogram), 1);
   });
 });
 
