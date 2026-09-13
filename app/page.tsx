@@ -41,16 +41,6 @@ function fgColor(v?: number): string {
   return "hsl(var(--success))";
 }
 
-function compactUsd(v?: string | null): string {
-  if (v == null || v === "") return "-";
-  const n = Number(v);
-  if (Number.isNaN(n)) return "-";
-  if (n >= 1e12) return `₩${(n / 1e12).toFixed(2)}조`;
-  if (n >= 1e8) return `₩${(n / 1e8).toFixed(0)}억`;
-  if (n >= 1e4) return `₩${(n / 1e4).toFixed(0)}만`;
-  return `₩${n.toLocaleString("ko-KR")}`;
-}
-
 
 function fmtNum(v?: string | null, frac = 2): string {
   if (v == null || v === "") return "-";
