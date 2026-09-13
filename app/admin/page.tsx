@@ -90,10 +90,16 @@ function Distribution({ title, rows }: { title: string; rows: Record<string, num
   );
 }
 
+const USER_STATUS_LABEL: Record<string, string> = {
+  APPROVED: "승인됨",
+  LOCKED: "잠김",
+  PENDING: "승인 대기",
+};
+
 function UserStatusBadge({ status }: { status: UserStatus }) {
   const variant =
     status === "APPROVED" ? "success" : status === "LOCKED" ? "destructive" : "warning";
-  return <Badge variant={variant}>{status}</Badge>;
+  return <Badge variant={variant}>{USER_STATUS_LABEL[status] ?? status}</Badge>;
 }
 
 function UserRow({ user, currentUserId }: { user: User; currentUserId?: string | number }) {
