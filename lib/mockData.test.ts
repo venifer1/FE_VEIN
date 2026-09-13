@@ -20,6 +20,7 @@ import {
   getSignalDetail,
   genCandles,
   getIndicators,
+  getCandles,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -355,6 +356,24 @@ describe("getIndicators", () => {
     expect(rsi).toBeGreaterThanOrEqual(45);
     expect(rsi).toBeLessThan(65);
     expect(Number(ind.macd) - Number(ind.macd_signal)).toBeCloseTo(Number(ind.macd_histogram), 1);
+  });
+});
+
+describe("getCandles", () => {
+  it("returns 200 candles", () => {
+    expect(getCandles("ins_btc", "1d")).toHaveLength(200);
+  });
+
+  it("memoizes per instrument:timeframe key (same reference)", () => {
+    const a = getCandles("ins_eth", "1d");
+    const b = getCandles("ins_eth", "1d");
+    expect(a).toBe(b); // 캐시된 동일 배열
+  });
+
+  it("keys separately by timeframe", () => {
+    const day = getCandles("ins_eth", "1d");
+    const hour = getCandles("ins_eth", "4h");
+    expect(day).not.toBe(hour);
   });
 });
 
