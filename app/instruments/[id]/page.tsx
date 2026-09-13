@@ -26,22 +26,12 @@ import {
   useAddWatchItem,
   useRemoveWatchItem,
 } from "@/lib/queries";
-import { formatPrice, formatTime, formatRelative } from "@/lib/format";
+import { formatPrice, formatTime, formatRelative, compactUsd } from "@/lib/format";
 import { timeframesForMarket, instrumentPathId } from "@/lib/types";
 import type { Freshness, Timeframe } from "@/lib/types";
 import { extractError } from "@/lib/api";
 import { useLivePrice } from "@/store/livePrices";
 
-// Compact USD for open interest, e.g. 7625000000 -> "$7.63B".
-function compactUsd(v?: string | null): string {
-  if (v == null || v === "") return "-";
-  const n = Number(v);
-  if (Number.isNaN(n)) return "-";
-  if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  return `$${n.toLocaleString()}`;
-}
 
 function InstrumentInner() {
   const params = useParams<{ id: string }>();

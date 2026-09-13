@@ -24,6 +24,19 @@ export function formatPrice(value?: string | null, opts?: { maxFrac?: number }):
   }
 }
 
+// USD 대형 금액 축약(미결제약정·시총 등): $1.50T / $7.63B / $2.10M / $12,345. 음수 안전.
+// data·derivatives·instruments 상세가 각각 중복 정의하던 것을 단일 소스로(R124).
+export function compactUsd(value?: string | null): string {
+  if (value == null || value === "") return "-";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "-";
+  const a = Math.abs(n);
+  if (a >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
+  if (a >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (a >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  return `$${n.toLocaleString()}`;
+}
+
 export function formatScore(value?: string | null): string {
   if (value == null || value === "") return "-";
   try {

@@ -9,19 +9,10 @@ import { ComplianceFooter, EmptyState, ErrorState } from "@/components/states";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatPrice, formatTime, toChartTime } from "@/lib/format";
+import { formatPrice, formatTime, toChartTime, compactUsd } from "@/lib/format";
 import { useDerivative } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
-function compactUsd(value?: string | null): string {
-  if (value == null || value === "") return "-";
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "-";
-  if (Math.abs(n) >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-  if (Math.abs(n) >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  return `$${n.toLocaleString()}`;
-}
 
 function HistoryChart({
   points,

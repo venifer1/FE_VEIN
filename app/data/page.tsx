@@ -8,7 +8,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { EmptyState, ErrorState, ComplianceFooter } from "@/components/states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatPrice, formatTime } from "@/lib/format";
+import { formatPrice, formatTime, compactUsd } from "@/lib/format";
 import {
   useDerivatives,
   useFundingArb,
@@ -23,15 +23,6 @@ import { cn } from "@/lib/utils";
 
 type SubTab = "tvl" | "supply" | "theme" | "funding" | "deriv" | "liquidation";
 
-function compactUsd(value?: string | null): string {
-  if (value == null || value === "") return "-";
-  const n = Number(value);
-  if (!Number.isFinite(n)) return "-";
-  if (Math.abs(n) >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
-  if (Math.abs(n) >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
-  if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
-  return `$${n.toLocaleString()}`;
-}
 
 function Pct({ value }: { value?: string | null }) {
   if (value == null || value === "") return <span className="text-muted-foreground">-</span>;

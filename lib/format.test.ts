@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatPct, pctSign, formatScore, formatPrice, formatRelative } from "./format";
+import { formatPct, pctSign, formatScore, formatPrice, formatRelative, compactUsd } from "./format";
 
 // FE 순수 표시 헬퍼 회귀 보호(R122). 값은 문자열 소수로 들어와 표시 시점에만 포맷된다.
 
@@ -45,6 +45,22 @@ describe("formatPrice", () => {
     expect(formatPrice(null)).toBe("-");
     expect(formatPrice("")).toBe("-");
     expect(formatPrice("x")).toBe("x");
+  });
+});
+
+describe("compactUsd", () => {
+  it("scales to T/B/M", () => {
+    expect(compactUsd("1500000000000")).toBe("$1.50T");
+    expect(compactUsd("7625000000")).toBe("$7.63B");
+    expect(compactUsd("2100000")).toBe("$2.10M");
+  });
+  it("below 1M uses locale grouping", () => {
+    expect(compactUsd("12345")).toBe("$12,345");
+  });
+  it("handles negatives and null/garbage", () => {
+    expect(compactUsd("-1500000000")).toBe("$-1.50B");
+    expect(compactUsd(null)).toBe("-");
+    expect(compactUsd("x")).toBe("-");
   });
 });
 
