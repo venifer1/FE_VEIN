@@ -462,6 +462,9 @@ function WatchRow({ item }: { item: WatchlistItem }) {
   const live = useLivePrice(item.instrument?.market === "CRYPTO" ? item.instrument?.symbol : undefined);
   const price = live?.price ?? item.last_price;
   const sig = item.recent_signal;
+  // 크립토는 라이브 WS가 등락률을 줘 관심종목에서 바로 오늘 흐름을 본다(BE 변경 없음, R112).
+  const rate = live?.change_rate != null && live.change_rate !== "" ? Number(live.change_rate) : null;
+  const hasRate = rate != null && Number.isFinite(rate);
   return (
     <li>
       <Link
@@ -477,10 +480,20 @@ function WatchRow({ item }: { item: WatchlistItem }) {
             </span>
           )}
         </span>
-        <span className="flex shrink-0 items-center gap-1">
+        <span className="flex shrink-0 items-center gap-2">
           <span className="font-mono text-sm tabular-nums">
             {item.price_error ? "시세 실패" : price != null ? formatPrice(price) : "-"}
           </span>
+          {hasRate && (
+            <span
+              className={cn(
+                "w-14 text-right text-xs tabular-nums",
+                rate >= 0 ? "text-[hsl(var(--success))]" : "text-destructive",
+              )}
+            >
+              {rate >= 0 ? "+" : ""}{rate.toFixed(2)}%
+            </span>
+          )}
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </span>
       </Link>
