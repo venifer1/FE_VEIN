@@ -198,7 +198,7 @@ function body(config: InternalAxiosRequestConfig): any {
 
 // Korean initial-consonant (초성) search support, e.g. "ㅂㅌ" → 비트코인.
 const CHO = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
-function toCho(s: string): string {
+export function toCho(s: string): string {
   let out = "";
   for (let i = 0; i < s.length; i++) {
     const ch = s[i];
@@ -208,15 +208,15 @@ function toCho(s: string): string {
   }
   return out;
 }
-function isChoQuery(q: string): boolean {
+export function isChoQuery(q: string): boolean {
   return q.length > 0 && q.split("").every((c) => CHO.includes(c));
 }
 
-function num(v: string | null | undefined): number {
+export function num(v: string | null | undefined): number {
   return v == null ? 0 : Number(v);
 }
 
-function trimNum(value: number): string {
+export function trimNum(value: number): string {
   return value.toFixed(8).replace(/\.?0+$/, "");
 }
 
