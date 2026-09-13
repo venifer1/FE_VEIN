@@ -346,7 +346,7 @@ function PositionList({ positions }: { positions: PaperPosition[] }) {
                   <p className="mt-0.5 font-medium tabular-nums">{formatPrice(p.margin)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">ROE</p>
+                  <p className="text-muted-foreground">수익률(ROE)</p>
                   <p className={cn("mt-0.5 font-medium tabular-nums", roeSign > 0 ? "text-emerald-600" : roeSign < 0 ? "text-destructive" : "")}>
                     {formatPct(roe)}
                   </p>
@@ -377,7 +377,7 @@ function OrderList({ orders }: { orders: PaperOrder[] }) {
             <span className="shrink-0 text-xs text-muted-foreground">{o.status}</span>
           </div>
           <div className="mt-1 flex items-center justify-between gap-3 text-xs text-muted-foreground">
-            <span>{o.investment_type}</span>
+            <span>{o.investment_type === "FUTURES" ? "선물" : o.investment_type === "SPOT" ? "현물" : o.investment_type}</span>
             <span className="tabular-nums">
               {o.quantity} @ {formatPrice(o.price)}
             </span>
