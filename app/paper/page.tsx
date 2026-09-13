@@ -14,24 +14,14 @@ import {
   usePaperPerformance,
   usePaperPortfolio,
 } from "@/lib/queries";
-import { formatPct, formatPrice, pctSign, koreanMoney } from "@/lib/format";
+import { formatPct, formatPrice, pctSign, koreanMoney, decimalString, ratioPct } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Instrument, PaperOrder, PaperPosition } from "@/lib/types";
 
 type PaperTab = "trade" | "positions" | "orders";
 
-function decimalString(value: number) {
-  if (!Number.isFinite(value)) return "";
-  return value.toFixed(8).replace(/\.?0+$/, "");
-}
 
 
-function ratioPct(numerator?: string | null, denominator?: string | null) {
-  const top = Number(numerator ?? 0);
-  const bottom = Number(denominator ?? 0);
-  if (!Number.isFinite(top) || !Number.isFinite(bottom) || bottom <= 0) return "0";
-  return decimalString((top / bottom) * 100);
-}
 
 function Metric({ label, value, tone }: { label: string; value: string; tone?: number }) {
   return (

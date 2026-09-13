@@ -72,6 +72,20 @@ export function fmtNum(v?: string | null, frac = 2): string {
   return n.toLocaleString("ko-KR", { maximumFractionDigits: frac });
 }
 
+// 수량 표기: 최대 8자리, 후행 0(및 남은 소수점) 제거. 예: 1.5000→"1.5", 100→"100". (R138)
+export function decimalString(value: number): string {
+  if (!Number.isFinite(value)) return "";
+  return value.toFixed(8).replace(/\.?0+$/, "");
+}
+
+// 비율(%) 문자열: numerator/denominator × 100. 분모≤0/비수치면 "0". (R138: paper ROE 등)
+export function ratioPct(numerator?: string | null, denominator?: string | null): string {
+  const top = Number(numerator ?? 0);
+  const bottom = Number(denominator ?? 0);
+  if (!Number.isFinite(top) || !Number.isFinite(bottom) || bottom <= 0) return "0";
+  return decimalString((top / bottom) * 100);
+}
+
 export function formatScore(value?: string | null): string {
   if (value == null || value === "") return "-";
   try {
