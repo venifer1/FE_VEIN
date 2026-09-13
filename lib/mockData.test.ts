@@ -13,6 +13,8 @@ import {
   tvlProtocols,
   getDerivativeDetail,
   derivatives,
+  getScalpDetail,
+  scalpRanking,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -206,6 +208,29 @@ describe("getDerivativeDetail", () => {
     const a = getDerivativeDetail(sym)!.long_short_history.map((p) => p.ratio);
     const b = getDerivativeDetail(sym)!.long_short_history.map((p) => p.ratio);
     expect(a).toEqual(b);
+  });
+});
+
+describe("getScalpDetail", () => {
+  const sym = scalpRanking[0].symbol; // "KRW-BTC"
+
+  it("returns null for an unknown symbol", () => {
+    expect(getScalpDetail("KRW-NOPE")).toBeNull();
+  });
+
+  it("returns a 5-level orderbook with ask>bid and correct ordering", () => {
+    const d = getScalpDetail(sym);
+    expect(d).not.toBeNull();
+    expect(d!.symbol).toBe(sym);
+    expect(d!.top_levels).toHaveLength(5);
+    const lv = d!.top_levels;
+    // 각 레벨 매도호가 > 매수호가
+    expect(lv.every((l) => Number(l.ask_price) > Number(l.bid_price))).toBe(true);
+    // 매도호가 오름차순, 매수호가 내림차순 (base에서 tick 만큼 벌어짐)
+    for (let i = 1; i < lv.length; i++) {
+      expect(Number(lv[i].ask_price)).toBeGreaterThan(Number(lv[i - 1].ask_price));
+      expect(Number(lv[i].bid_price)).toBeLessThan(Number(lv[i - 1].bid_price));
+    }
   });
 });
 
