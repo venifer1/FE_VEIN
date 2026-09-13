@@ -590,12 +590,14 @@ function HomeInner() {
       <EconomicCalendar />
       <TopSignalsSection />
       <InstrumentSearch />
+      {/* 개인 관심종목을 일반 시장개요(글로벌·지수·급등락·트렌딩·김프)보다 위로 —
+          매일 확인하는 것을 스크롤 없이 보게 한다("내가 쓰려고" 우선순위, R117). */}
+      <WatchlistMini />
       <GlobalMarketSection />
       <IndicesSection />
       <MoversSection />
       <TrendingSection />
       <KimchiSection />
-      <WatchlistMini />
       <ComplianceFooter />
     </div>
   );
