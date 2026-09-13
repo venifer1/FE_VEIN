@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { getSignalPerformanceSummary, classifyFg, metricsFromTrades, getMovers } from "./mockData";
+import {
+  getSignalPerformanceSummary,
+  classifyFg,
+  metricsFromTrades,
+  getMovers,
+  getFearGreedHistory,
+} from "./mockData";
 import type { BacktestTrade } from "./types";
 
 // 등락 순위(movers) 시장·타입 라우팅 + 거래대금 정렬 회귀 보호(R147).
@@ -28,6 +34,32 @@ describe("getMovers", () => {
   it("US VOLUME merges gainers and losers", () => {
     const merged = getMovers("VOLUME", "US").length;
     expect(merged).toBe(getMovers("GAINERS", "US").length + getMovers("LOSERS", "US").length);
+  });
+});
+
+describe("getFearGreedHistory", () => {
+  it("returns `days` points, defaulting to 30", () => {
+    expect(getFearGreedHistory()).toHaveLength(30);
+    expect(getFearGreedHistory(7)).toHaveLength(7);
+  });
+
+  it("clamps every value into [5,95]", () => {
+    for (const p of getFearGreedHistory(60)) {
+      const v = Number(p.value);
+      expect(v).toBeGreaterThanOrEqual(5);
+      expect(v).toBeLessThanOrEqual(95);
+    }
+  });
+
+  it("is deterministic (seeded) — same values across calls", () => {
+    const a = getFearGreedHistory(20).map((p) => p.value);
+    const b = getFearGreedHistory(20).map((p) => p.value);
+    expect(a).toEqual(b);
+  });
+
+  it("orders points oldest→newest by date", () => {
+    const dates = getFearGreedHistory(10).map((p) => p.date);
+    expect([...dates].sort()).toEqual(dates);
   });
 });
 
