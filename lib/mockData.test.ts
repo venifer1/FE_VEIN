@@ -1,5 +1,47 @@
 import { describe, it, expect } from "vitest";
-import { getSignalPerformanceSummary, classifyFg } from "./mockData";
+import { getSignalPerformanceSummary, classifyFg, metricsFromTrades } from "./mockData";
+import type { BacktestTrade } from "./types";
+
+// 데모 백테스트 지표 집계(승률·손익비·복리수익·MDD) 회귀 보호(R146).
+const trade = (return_pct: string | null): BacktestTrade => ({ symbol: "X", return_pct });
+
+describe("metricsFromTrades", () => {
+  it("computes win rate, profit factor, compounded return and drawdown", () => {
+    const m = metricsFromTrades([trade("10"), trade("-5"), trade("20")]);
+    expect(m.trade_count).toBe(3);
+    expect(m.win_rate).toBe("66.7"); // 2/3
+    expect(m.avg_return_pct).toBe("8.33"); // 25/3
+    expect(m.total_return_pct).toBe("25.4"); // 1.1*0.95*1.2 -1
+    expect(m.profit_factor).toBe("6.00"); // 30/5
+    expect(m.max_drawdown_pct).toBe("-5.0"); // -5% dip after peak 1.1
+    expect(m.best_pct).toBe("20.00");
+    expect(m.worst_pct).toBe("-5.00");
+  });
+
+  it("drops NaN returns but counts null as 0% (Number(null)===0)", () => {
+    // "abc"→NaN 제외, null→0(유한)으로 계수 → returns=[10,0,-5], n=3
+    const m = metricsFromTrades([trade("10"), trade("abc"), trade(null), trade("-5")]);
+    expect(m.trade_count).toBe(3);
+    expect(m.win_rate).toBe("66.7"); // 10과 0이 승 → 2/3
+    expect(m.profit_factor).toBe("2.00"); // 10/5
+  });
+
+  it("caps profit factor at 99 when there are wins but no losses", () => {
+    const m = metricsFromTrades([trade("5"), trade("5")]);
+    expect(m.win_rate).toBe("100.0");
+    expect(m.profit_factor).toBe("99.00");
+  });
+
+  it("returns zeros and null best/worst for an empty trade list", () => {
+    const m = metricsFromTrades([]);
+    expect(m.trade_count).toBe(0);
+    expect(m.win_rate).toBe("0.0");
+    expect(m.total_return_pct).toBe("0.0");
+    expect(m.profit_factor).toBe("0.00");
+    expect(m.best_pct).toBeNull();
+    expect(m.worst_pct).toBeNull();
+  });
+});
 
 // 공포·탐욕 지수(Fear & Greed) 라벨 분류 경계값 회귀 보호(R145). 데모 F&G 히스토리 칩 색·문구.
 describe("classifyFg", () => {

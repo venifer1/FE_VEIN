@@ -784,7 +784,7 @@ export const systemStatus: SystemStatus = {
 // ---------------- backtest (백테스트) ----------------
 // Compute the metrics block (same shape as BacktestResult.metrics) from a slice
 // of trades. Decimals returned as strings. Used for full + IS/OOS slices.
-function metricsFromTrades(trades: BacktestResult["trades"]): BacktestMetrics {
+export function metricsFromTrades(trades: BacktestResult["trades"]): BacktestMetrics {
   let wins = 0;
   let grossWin = 0;
   let grossLoss = 0;
