@@ -270,7 +270,7 @@ export function idMatches(entityId: string | number, pathId: string): boolean {
 
 // R39: 경제 캘린더 목업. 실 백엔드는 큐레이션 고정일+NFP 규칙이지만, 목업은 "오늘"부터
 // 상대적으로 배치해 항상 임박 이벤트가 보이도록 합성한다(계약 형태만 동일).
-function upcomingMacroEvents(days: number) {
+export function upcomingMacroEvents(days: number) {
   const seeds: Array<{ inDays: number; type: "FOMC" | "CPI" | "EMPLOYMENT"; title: string }> = [
     { inDays: 1, type: "CPI", title: "미국 소비자물가(CPI)" },
     { inDays: 4, type: "EMPLOYMENT", title: "미국 고용보고서(비농업)" },

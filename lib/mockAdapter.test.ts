@@ -8,6 +8,7 @@ import {
   parseUrl,
   body,
   buildNotificationDigest,
+  upcomingMacroEvents,
 } from "./mockAdapter";
 import type { InternalAxiosRequestConfig } from "axios";
 import type { Notification } from "./types";
@@ -136,6 +137,27 @@ describe("buildNotificationDigest (알림 다이제스트 R45)", () => {
     expect(d.total).toBe(0);
     expect(d.unread).toBe(0);
     expect(d.categories).toEqual([]);
+  });
+});
+
+describe("upcomingMacroEvents (경제 캘린더 R39)", () => {
+  it("filters seeds by the day window and reports dday", () => {
+    expect(upcomingMacroEvents(1).map((e) => e.dday)).toEqual([1]);
+    expect(upcomingMacroEvents(10).map((e) => e.dday)).toEqual([1, 4, 9]);
+  });
+
+  it("clamps the window into [1,90]", () => {
+    // 0 이하는 1로, 90 초과는 90으로
+    expect(upcomingMacroEvents(0).map((e) => e.dday)).toEqual([1]);
+    expect(upcomingMacroEvents(1000).map((e) => e.dday)).toEqual([1, 4, 9, 22]);
+  });
+
+  it("date equals today + dday (UTC yyyy-MM-dd)", () => {
+    const first = upcomingMacroEvents(30)[0];
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + first.dday);
+    expect(first.date).toBe(d.toISOString().slice(0, 10));
+    expect(first.region).toBe("US");
   });
 });
 
