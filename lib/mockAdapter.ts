@@ -836,6 +836,8 @@ export const mockAdapter: AxiosAdapter = async (config) => {
       id: `pord_${++paperOrderSeq}`,
       account_id: mockPaperAccount.id,
       instrument_id: instId,
+      symbol: inst!.symbol,
+      name: inst!.name,
       signal_id: b.signal_id ?? null,
       investment_type: investmentType,
       position_side: positionSide,

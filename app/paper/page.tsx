@@ -371,7 +371,8 @@ function OrderList({ orders }: { orders: PaperOrder[] }) {
         <div key={o.id} className="rounded-md border border-border px-3 py-2 text-sm">
           <div className="flex items-center justify-between gap-3">
             <span className="min-w-0 truncate font-medium">
-              {o.investment_type === "FUTURES" ? `${o.position_side}${o.reduce_only ? " 청산" : ""}` : o.side} #{o.instrument_id}
+              {o.investment_type === "FUTURES" ? `${o.position_side}${o.reduce_only ? " 청산" : ""}` : o.side}{" "}
+              {o.symbol ?? `#${o.instrument_id}`}
             </span>
             <span className="shrink-0 text-xs text-muted-foreground">{o.status}</span>
           </div>

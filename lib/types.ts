@@ -570,6 +570,8 @@ export interface PaperOrder {
   id: string;
   account_id: string;
   instrument_id: number;
+  symbol?: string | null;
+  name?: string | null;
   signal_id?: number | null;
   investment_type: "SPOT" | "FUTURES" | string;
   position_side?: "LONG" | "SHORT" | string | null;
