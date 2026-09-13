@@ -245,7 +245,14 @@ function InstrumentInner() {
                 <span>MA60 {formatPrice(indicatorsQuery.data.ma60)}</span>
                 <span>볼린저↑ {formatPrice(indicatorsQuery.data.boll_upper)}</span>
                 <span>볼린저↓ {formatPrice(indicatorsQuery.data.boll_lower)}</span>
-                <span>MACD {indicatorsQuery.data.macd}</span>
+                {(() => {
+                  // MACD 부호 색: 양수 상승 모멘텀(초록)·음수 하락(빨강). RSI 색과 일관. (R105)
+                  const v = indicatorsQuery.data.macd;
+                  const n = Number(v);
+                  const has = v != null && v !== "" && !Number.isNaN(n);
+                  const cls = !has ? "" : n > 0 ? "text-[hsl(var(--success))]" : n < 0 ? "text-destructive" : "";
+                  return <span className={cls}>MACD {has ? v : "-"}</span>;
+                })()}
               </div>
             </CardContent>
           </Card>
