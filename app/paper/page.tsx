@@ -14,7 +14,7 @@ import {
   usePaperPerformance,
   usePaperPortfolio,
 } from "@/lib/queries";
-import { formatPct, formatPrice, pctSign } from "@/lib/format";
+import { formatPct, formatPrice, pctSign, koreanMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Instrument, PaperOrder, PaperPosition } from "@/lib/types";
 
@@ -25,16 +25,6 @@ function decimalString(value: number) {
   return value.toFixed(8).replace(/\.?0+$/, "");
 }
 
-// 큰 금액을 사람이 읽는 한글 단위로(예: 10000000 → "1,000만원", 150000000 → "1억 5,000만원").
-function koreanMoney(n: number): string {
-  if (!Number.isFinite(n) || n < 10000) return "";
-  const eok = Math.floor(n / 1e8);
-  const man = Math.floor((n % 1e8) / 1e4);
-  const parts: string[] = [];
-  if (eok) parts.push(`${eok.toLocaleString("ko-KR")}억`);
-  if (man) parts.push(`${man.toLocaleString("ko-KR")}만`);
-  return parts.length ? parts.join(" ") + "원" : "";
-}
 
 function ratioPct(numerator?: string | null, denominator?: string | null) {
   const top = Number(numerator ?? 0);

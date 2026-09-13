@@ -8,6 +8,7 @@ import {
   compactUsd,
   formatTime,
   toChartTime,
+  koreanMoney,
 } from "./format";
 
 // FE 순수 표시 헬퍼 회귀 보호(R122). 값은 문자열 소수로 들어와 표시 시점에만 포맷된다.
@@ -70,6 +71,19 @@ describe("compactUsd", () => {
     expect(compactUsd("-1500000000")).toBe("$-1.50B");
     expect(compactUsd(null)).toBe("-");
     expect(compactUsd("x")).toBe("-");
+  });
+});
+
+describe("koreanMoney", () => {
+  it("formats 억/만원", () => {
+    expect(koreanMoney(10000000)).toBe("1,000만원");
+    expect(koreanMoney(150000000)).toBe("1억 5,000만원");
+    expect(koreanMoney(100000000)).toBe("1억원");
+  });
+  it("returns empty below 1만 or non-finite", () => {
+    expect(koreanMoney(9999)).toBe("");
+    expect(koreanMoney(0)).toBe("");
+    expect(koreanMoney(NaN)).toBe("");
   });
 });
 

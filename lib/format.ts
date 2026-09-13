@@ -37,6 +37,18 @@ export function compactUsd(value?: string | null): string {
   return `$${n.toLocaleString()}`;
 }
 
+// 큰 원화 금액을 사람이 읽는 한글 단위로(예: 10000000 → "1,000만원", 150000000 → "1억 5,000만원").
+// 1만원 미만/비수치는 빈 문자열(보조 힌트용). (R127: paper 로컬 정의를 lib로 추출)
+export function koreanMoney(n: number): string {
+  if (!Number.isFinite(n) || n < 10000) return "";
+  const eok = Math.floor(n / 1e8);
+  const man = Math.floor((n % 1e8) / 1e4);
+  const parts: string[] = [];
+  if (eok) parts.push(`${eok.toLocaleString("ko-KR")}억`);
+  if (man) parts.push(`${man.toLocaleString("ko-KR")}만`);
+  return parts.length ? parts.join(" ") + "원" : "";
+}
+
 export function formatScore(value?: string | null): string {
   if (value == null || value === "") return "-";
   try {
