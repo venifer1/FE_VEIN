@@ -338,10 +338,10 @@ function FundingTab() {
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span>
-                  기대 1회 <Pct value={row.expected1x_pct} />
+                  기대 1배 <Pct value={row.expected1x_pct} />
                 </span>
                 <span>
-                  기대 2회 <Pct value={row.expected2x_pct} />
+                  기대 2배 <Pct value={row.expected2x_pct} />
                 </span>
               </div>
             </CardContent>
