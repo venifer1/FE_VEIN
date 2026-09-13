@@ -1,5 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { formatPct, pctSign, formatScore, formatPrice, formatRelative, compactUsd } from "./format";
+import {
+  formatPct,
+  pctSign,
+  formatScore,
+  formatPrice,
+  formatRelative,
+  compactUsd,
+  formatTime,
+  toChartTime,
+} from "./format";
 
 // FE 순수 표시 헬퍼 회귀 보호(R122). 값은 문자열 소수로 들어와 표시 시점에만 포맷된다.
 
@@ -74,5 +83,20 @@ describe("formatRelative", () => {
   });
   it("null-safe", () => {
     expect(formatRelative(null, now)).toBe("-");
+  });
+});
+
+describe("toChartTime", () => {
+  it("converts ISO to epoch seconds", () => {
+    // 독립 구성(Date.UTC)으로 교차검증 — 구현 자기참조 회피.
+    expect(toChartTime("2026-06-12T15:00:00Z")).toBe(Date.UTC(2026, 5, 12, 15, 0, 0) / 1000);
+  });
+});
+
+describe("formatTime", () => {
+  it("null -> dash, invalid iso -> passthrough", () => {
+    expect(formatTime(null)).toBe("-");
+    expect(formatTime("")).toBe("-");
+    expect(formatTime("not-a-date")).toBe("not-a-date");
   });
 });
