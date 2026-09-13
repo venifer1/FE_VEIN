@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useMarketIndices, useKimchiPremium, useWatchlist, useFearGreedHistory, useIndexHistory, useMovers, useTrending, useGlobalMarket, useOnboarding, useDismissOnboarding } from "@/lib/queries";
-import { formatPrice } from "@/lib/format";
+import { formatPrice, compactUsdScaled } from "@/lib/format";
 import { indicesByKey, instrumentPathId } from "@/lib/types";
 import type { Freshness, Market, MoverType, WatchlistItem } from "@/lib/types";
 import { useLivePrice, useLiveConnected } from "@/store/livePrices";
@@ -51,18 +51,6 @@ function compactUsd(v?: string | null): string {
   return `₩${n.toLocaleString("ko-KR")}`;
 }
 
-// Compact USD with a Korean 조(=1e12)/억(=1e8) scale, e.g. "$3.42조". Null-safe.
-function compactUsdScaled(v?: string | null): string {
-  if (v == null || v === "") return "-";
-  const n = Number(v);
-  if (Number.isNaN(n)) return "-";
-  const neg = n < 0 ? "-" : "";
-  const a = Math.abs(n);
-  if (a >= 1e12) return `${neg}$${(a / 1e12).toFixed(2)}조`;
-  if (a >= 1e8) return `${neg}$${(a / 1e8).toFixed(2)}억`;
-  if (a >= 1e4) return `${neg}$${(a / 1e4).toFixed(0)}만`;
-  return `${neg}$${a.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-}
 
 function fmtNum(v?: string | null, frac = 2): string {
   if (v == null || v === "") return "-";

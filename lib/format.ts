@@ -49,6 +49,20 @@ export function koreanMoney(n: number): string {
   return parts.length ? parts.join(" ") + "원" : "";
 }
 
+// USD 금액을 한글 조(1e12)/억(1e8)/만(1e4) 스케일로, 예: "$3.42조". 음수 안전, null→"-".
+// (R129: 홈 로컬 정의를 lib로 추출. compactUsd(T/B/M)와 달리 한글 단위 표기.)
+export function compactUsdScaled(v?: string | null): string {
+  if (v == null || v === "") return "-";
+  const n = Number(v);
+  if (Number.isNaN(n)) return "-";
+  const neg = n < 0 ? "-" : "";
+  const a = Math.abs(n);
+  if (a >= 1e12) return `${neg}$${(a / 1e12).toFixed(2)}조`;
+  if (a >= 1e8) return `${neg}$${(a / 1e8).toFixed(2)}억`;
+  if (a >= 1e4) return `${neg}$${(a / 1e4).toFixed(0)}만`;
+  return `${neg}$${a.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
 export function formatScore(value?: string | null): string {
   if (value == null || value === "") return "-";
   try {
