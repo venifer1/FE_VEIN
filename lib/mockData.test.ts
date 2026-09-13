@@ -15,6 +15,8 @@ import {
   derivatives,
   getScalpDetail,
   scalpRanking,
+  getSignalPerformance,
+  signals,
 } from "./mockData";
 import type { BacktestTrade } from "./types";
 
@@ -230,6 +232,39 @@ describe("getScalpDetail", () => {
     for (let i = 1; i < lv.length; i++) {
       expect(Number(lv[i].ask_price)).toBeGreaterThan(Number(lv[i - 1].ask_price));
       expect(Number(lv[i].bid_price)).toBeLessThan(Number(lv[i - 1].bid_price));
+    }
+  });
+});
+
+describe("getSignalPerformance", () => {
+  it("returns null for an unknown signal id", () => {
+    expect(getSignalPerformance("zzz_nope")).toBeNull();
+  });
+
+  it("finds a signal by full id or its numeric suffix", () => {
+    const s0 = signals[0];
+    const byFull = getSignalPerformance(s0.id);
+    expect(byFull).not.toBeNull();
+    expect(byFull!.signal_id).toBe(s0.id);
+    // 접두사 제거 숫자만으로도 매칭(예: "sig_001" ↔ "001")
+    const numeric = s0.id.replace(/^[a-zA-Z]+_/, "");
+    expect(getSignalPerformance(numeric)?.signal_id).toBe(s0.id);
+  });
+
+  it("evaluated signals expose the full horizon ladder", () => {
+    // NEAR_COMPLETION 등 비-fresh 신호는 5개 지평(1h~7d) 평가
+    const evaluated = signals.find((s) => s.status === "NEAR_COMPLETION");
+    if (evaluated) {
+      expect(getSignalPerformance(evaluated.id)!.horizons).toHaveLength(5);
+    }
+  });
+
+  it("too-fresh DETECTED signals have no evaluated horizons yet", () => {
+    const fresh = signals.find(
+      (s) => s.status === "DETECTED" && Number(s.id.replace(/\D/g, "")) % 2 === 0,
+    );
+    if (fresh) {
+      expect(getSignalPerformance(fresh.id)!.horizons).toEqual([]);
     }
   });
 });
