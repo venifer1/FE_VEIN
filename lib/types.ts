@@ -310,7 +310,8 @@ export interface Signal {
   market: Market;
   timeframe: Timeframe;
   detected_at: string;
-  score?: string | null;
+  score?: string | null; // 구조 점수(탐지기 완성도)
+  pattern_score?: string | null; // 종합 Pattern Score(완성도+거래량+추세+변동성+뉴스, R90/R101). 미계산 시 null
   current_price?: string | null;
   c_target?: string | null; // ABC/TOP: C 목표가(c100), IMALOL: C 예상가(투영가)
   subtype?: string | null;

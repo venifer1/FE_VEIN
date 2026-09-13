@@ -70,7 +70,12 @@ export function SignalCard({ signal, perfHint }: { signal: Signal; perfHint?: Si
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
               <span className="rounded bg-secondary px-1.5 py-0.5">{signal.timeframe}</span>
-              <span>구조 점수 {formatScore(signal.score)}</span>
+              {/* 종합 Pattern Score가 계산돼 있으면 그걸(홈 정렬 기준과 일치), 아니면 구조 점수. (R101) */}
+              {signal.pattern_score != null && signal.pattern_score !== "" ? (
+                <span>종합 {formatScore(signal.pattern_score)}</span>
+              ) : (
+                <span>구조 점수 {formatScore(signal.score)}</span>
+              )}
               <span>·</span>
               <span>현재가 {formatPrice(signal.current_price)}</span>
               {showCTarget && (
